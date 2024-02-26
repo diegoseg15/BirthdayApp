@@ -1,34 +1,59 @@
-# Birthday Reminder App
+# BirthdayApp
 
-Esta aplicación de recordatorio de cumpleaños, desarrollada en React Native, te permite gestionar las fechas de cumpleaños de familiares y amigos de manera eficiente. Almacenadas en Firebase, las fechas se actualizan y mantienen fácilmente.
+## Descripción
+
+BirthdayApp es una aplicación de recordatorio de cumpleaños desarrollada en React Native. Esta aplicación te permite gestionar las fechas de cumpleaños de familiares y amigos de manera eficiente. Las fechas se almacenan en Firebase, lo que permite una fácil actualización y mantenimiento.
+
+## Autor
+
+- Nombre de usuario de GitHub: diegoseg15
+- Autor: Diego Segovia
+- Redes sociales:
+  - Instagram: [@diegoseg_15](https://www.instagram.com/diegoseg_15)
+  - TikTok: [@diegoseg_15](https://www.tiktok.com/@diegoseg_15)
+
+## Instalación
+
+Para utilizar esta aplicación, puedes clonar este repositorio usando el siguiente comando:
+
+```
+git clone https://github.com/diegoseg15/birthdayapp.git
+```
+
+Luego, instala las dependencias usando yarn:
+
+```
+yarn install
+```
+
+## Uso
+
+Una vez que hayas clonado el repositorio y instalado las dependencias, puedes ejecutar la aplicación en un emulador o dispositivo móvil usando el siguiente comando:
+
+```
+yarn start
+```
+
+Esto iniciará la aplicación y podrás comenzar a gestionar las fechas de cumpleaños de tus familiares y amigos.
 
 ## Componentes
 
-### 1. Action Bar
+La aplicación cuenta con los siguientes componentes:
 
-La barra de acciones proporciona acceso rápido a funciones clave, como agregar nuevos cumpleaños, ver la lista completa y realizar acciones de inicio de sesión.
+- **Action Bar**: Barra de acciones para navegar por la aplicación.
+- **AddBirthday**: Componente para agregar nuevos cumpleaños.
+- **ListBirthday**: Componente para mostrar la lista de cumpleaños almacenados.
+- **LoginForm**: Formulario de inicio de sesión.
+- **RegisterForm**: Formulario de registro de usuario.
 
-### 2. AddBirthday
+## Licencia
 
-El componente AddBirthday te permite agregar nuevos cumpleaños a la lista. Ingrese el nombre y la fecha, y la aplicación se encargará del resto, asegurando que no se olvide de felicitar a sus seres queridos.
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para obtener más detalles.
 
-### 3. ListBirthday
+## Contribución
 
-Consulta la lista completa de cumpleaños almacenados. Organizados por fecha, facilita la visualización de los próximos eventos especiales y garantiza que estés siempre preparado para celebrar.
+Las contribuciones son bienvenidas. Si deseas contribuir a este proyecto, no dudes en abrir un issue o enviar una solicitud de extracción.
 
-### 4. LoginForm
+## Contacto
 
-El formulario de inicio de sesión proporciona seguridad para garantizar que solo las personas autorizadas puedan acceder a la información de cumpleaños almacenada. ¡Protege los datos de tus seres queridos!
-
-### 5. RegisterForm
-
-Si eres nuevo en la aplicación, el formulario de registro te permite crear una cuenta personal. Disfruta de una experiencia personalizada y mantén tus datos seguros con tu propia cuenta.
-
-## Configuración del Proyecto
-
-1. Clona este repositorio: `git clone https://github.com/tu-usuario/birthday-reminder-app.git`
-2. Instala las dependencias: `npm install`
-3. Configura tu proyecto en Firebase y actualiza las credenciales en el archivo de configuración.
-4. Ejecuta la aplicación: `npm start`
-
-¡Celebra cumpleaños de manera organizada y nunca olvides un momento especial con la aplicación de recordatorio de cumpleaños en React Native!# birthdayapp
+Si tienes alguna pregunta o sugerencia sobre esta aplicación, puedes contactarme a través de mis redes sociales mencionadas anteriormente o abrir un issue en este repositorio. ¡Espero que disfrutes utilizando BirthdayApp para recordar los cumpleaños de tus seres queridos!
