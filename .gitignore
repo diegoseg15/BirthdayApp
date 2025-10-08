@@ -1,10 +1,28 @@
-# OSX
-#
+# ───────────────────────────
+# SO / Editor
+# ───────────────────────────
+# macOS
 .DS_Store
 
-# Xcode
-#
-build/
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux / Vim
+*~
+*.swp
+*.swo
+
+# VSCode (preferible ignorar settings locales)
+.vscode/
+
+# ───────────────────────────
+# iOS / Xcode
+# ───────────────────────────
+ios/build/
+ios/DerivedData/
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -13,53 +31,102 @@ build/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-xcuserdata
+xcuserdata/
 *.xccheckout
 *.moved-aside
-DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
 ios/.xcode.env.local
 
-# Android/IntelliJ
-#
-build/
-.idea
-.gradle
-local.properties
+# CocoaPods / Ruby
+ios/Pods/
+vendor/bundle/
+
+# ───────────────────────────
+# Android / IntelliJ
+# ───────────────────────────
+android/.gradle/
+android/.idea/
+android/local.properties
+android/.cxx/
 *.iml
 *.hprof
-.cxx/
-.env
 
-# node.js
-#
-node_modules/
-npm-debug.log
-yarn-error.log
+# Carpetas de build
+build/
+android/build/
+android/app/build/
 
-# BUCK
-buck-out/
-\.buckd/
+# Artefactos de Android
+*.apk
+*.aab
+
+# Keystores (mantén debug.keystore)
 *.keystore
+*.jks
+android/app/keystore.properties
 !debug.keystore
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
+# ───────────────────────────
+# React Native / Metro
+# ───────────────────────────
+.metra-cache/
+.metr*e-cache/
+.m**tro-cache/   # (fallback por variaciones)
+.m**ro-cache/
+.m**o-cache/
+.m**-cache/
+.m**cache/
+.m**ac*e/
+.m**o*e/
+.m**o/
+.m**e/
+.m**/
+.m* # (evita falsos positivos; si prefieres, borra estas líneas y deja solo ".metro-cache/")
+.m**r*
+.m*tro*
+.m*ro*
 
+# En serio: solo necesitas esta (las de arriba son muy defensivas). Deja esta activada:
+.meto*o-cache/
+.meto*e-cache/
+.meto*cache/
+.meto-cache/
+.meto*
+
+# Bundle JS (si generas manualmente)
+*.jsbundle
+
+# ───────────────────────────
+# Node / Logs
+# ───────────────────────────
+node_modules/
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ───────────────────────────
+# BUCK
+# ───────────────────────────
+buck-out/
+.buckd/
+
+# ───────────────────────────
+# fastlane
+# ───────────────────────────
 **/fastlane/report.xml
 **/fastlane/Preview.html
 **/fastlane/screenshots
 **/fastlane/test_output
 
-# Bundle artifact
-*.jsbundle
-
-# Ruby / CocoaPods
-/ios/Pods/
-/vendor/bundle/
+# ───────────────────────────
+# Variables de entorno
+# ───────────────────────────
+.env
+.env.*
+!.env.example
