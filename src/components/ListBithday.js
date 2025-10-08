@@ -3,8 +3,6 @@ import {ScrollView, StyleSheet, View, Alert} from 'react-native';
 import AddBirthday from './AddBirthday';
 import ActionBar from './ActionBar';
 import firebase from '../utils/firebase';
-import 'firebase/firestore';
-import {firestore} from 'firebase';
 import moment from 'moment';
 import Birthday from './Birthday';
 

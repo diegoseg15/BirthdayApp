@@ -9,7 +9,6 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import firebase from '../utils/firebase';
-import 'firebase/firestore';
 
 firebase.firestore().settings({experimentalForceLongPolling: true});
 const db = firebase.firestore(firebase);

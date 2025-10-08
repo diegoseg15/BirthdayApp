@@ -1,4 +1,8 @@
-import firebase from 'firebase/app';
+// src/utils/firebase.js
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+
 import {
   FIREBASE_API_KEY,
   AUTH_DOMAIN,
@@ -17,4 +21,9 @@ const firebaseConfig = {
   appId: APP_ID,
 };
 
-export default firebase.initializeApp(firebaseConfig);
+// Evita inicializar dos veces en fast refresh
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+export default firebase;
