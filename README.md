@@ -1,59 +1,171 @@
-# BirthdayApp
+# BirthdayApp *(BETA)*
 
-## Descripción
+**BirthdayApp** es una aplicación móvil para **recordar cumpleaños** desarrollada con **React Native**. Permite **registrar, listar y gestionar** cumpleaños de familiares y amigos. Los datos se almacenan en **Firebase**.
 
-BirthdayApp es una aplicación de recordatorio de cumpleaños desarrollada en React Native. Esta aplicación te permite gestionar las fechas de cumpleaños de familiares y amigos de manera eficiente. Las fechas se almacenan en Firebase, lo que permite una fácil actualización y mantenimiento.
+> **Estado:** Versión **BETA**.
+> Puede contener cambios no definitivos y pequeños errores mientras consolidamos la versión estable.
+
+## Tecnologías
+
+* React Native **0.70.6**
+* Firebase Web SDK
+* @react-native-community/datetimepicker, react-native-modal-datetime-picker
+* AsyncStorage, moment
 
 ## Autor
 
-- Nombre de usuario de GitHub: diegoseg15
-- Autor: Diego Segovia
-- Redes sociales:
-  - Instagram: [@diegoseg_15](https://www.instagram.com/diegoseg_15)
-  - TikTok: [@diegoseg_15](https://www.tiktok.com/@diegoseg_15)
+* **GitHub:** [diegoseg15](https://github.com/diegoseg15)
+* **LinkedIn:** [Diego Segovia](https://www.linkedin.com/in/diegoseg15)
+* **Portafolio:** [portfolio-77060.web.app](https://portfolio-77060.web.app/)
+
+---
+
+## Requisitos previos
+
+* **Node.js** 16.x (recomendado: 16.20.x) y **npm** 8+
+* **Java 11**
+* **Android SDK** (Build-Tools y Platform 31+)
+* Dispositivo o emulador Android configurado
+
+---
 
 ## Instalación
 
-Para utilizar esta aplicación, puedes clonar este repositorio usando el siguiente comando:
-
-```
+```bash
 git clone https://github.com/diegoseg15/birthdayapp.git
+cd birthdayapp
+npm install
 ```
 
-Luego, instala las dependencias usando yarn:
+---
 
-```
-yarn install
-```
+## Ejecución en desarrollo
 
-## Uso
+En una terminal:
 
-Una vez que hayas clonado el repositorio y instalado las dependencias, puedes ejecutar la aplicación en un emulador o dispositivo móvil usando el siguiente comando:
-
-```
-yarn start
+```bash
+npm run start
 ```
 
-Esto iniciará la aplicación y podrás comenzar a gestionar las fechas de cumpleaños de tus familiares y amigos.
+En otra terminal:
 
-## Componentes
+```bash
+npm run android
+```
 
-La aplicación cuenta con los siguientes componentes:
+---
 
-- **Action Bar**: Barra de acciones para navegar por la aplicación.
-- **AddBirthday**: Componente para agregar nuevos cumpleaños.
-- **ListBirthday**: Componente para mostrar la lista de cumpleaños almacenados.
-- **LoginForm**: Formulario de inicio de sesión.
-- **RegisterForm**: Formulario de registro de usuario.
+## Scripts
 
-## Licencia
+```json
+"scripts": {
+  "android": "react-native run-android",
+  "ios": "react-native run-ios",
+  "start": "react-native start",
+  "test": "jest",
+  "lint": "eslint ."
+}
+```
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para obtener más detalles.
+---
+
+## Generar APK
+
+### Debug (para pruebas)
+
+```bash
+cd android
+./gradlew assembleDebug
+```
+
+Salida: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+### Release firmado (para distribuir)
+
+1. Genera un **keystore**:
+
+   ```bash
+   cd android/app
+   keytool -genkey -v -keystore my-release-key.jks -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Configura credenciales en `~/.gradle/gradle.properties`:
+
+   ```
+   MYAPP_UPLOAD_STORE_FILE=android/app/my-release-key.jks
+   MYAPP_UPLOAD_KEY_ALIAS=my-key-alias
+   MYAPP_UPLOAD_STORE_PASSWORD=********
+   MYAPP_UPLOAD_KEY_PASSWORD=********
+   ```
+3. En `android/app/build.gradle`, define `signingConfigs.release` y úsalo en `buildTypes.release` (puedes activar `minifyEnabled` y `shrinkResources`).
+4. Construye:
+
+   ```bash
+   cd android
+   ./gradlew clean
+   ./gradlew assembleRelease
+   ```
+
+Salida: `android/app/build/outputs/apk/release/app-release.apk`
+
+---
+
+## Componentes principales
+
+* **ActionBar**: navegación y acciones.
+* **AddBirthday**: alta de cumpleaños.
+* **ListBirthday**: listado y organización.
+* **LoginForm**: inicio de sesión.
+* **RegisterForm**: registro de usuario.
+
+---
+
+## Estructura sugerida
+
+```
+src/
+  components/
+  screens/
+  utils/
+    firebase.js
+  hooks/
+```
+
+---
+
+## Versionado
+
+* **v1.x** → versión React Native CLI (**BETA**).
+* **v2.x** → migración a Expo (en rama/tag separado).
+
+Ejemplo de etiquetado:
+
+```bash
+git tag -a v1.0.0 -m "Release (BETA): RN CLI v1.0.0"
+git push origin v1.0.0
+```
+
+---
 
 ## Contribución
 
-Las contribuciones son bienvenidas. Si deseas contribuir a este proyecto, no dudes en abrir un issue o enviar una solicitud de extracción.
+1. Crea una rama `feat/...` o `fix/...`.
+2. Asegura lint y tests.
+3. Abre un Pull Request hacia `main`.
 
-## Contacto
+---
 
-Si tienes alguna pregunta o sugerencia sobre esta aplicación, puedes contactarme a través de mis redes sociales mencionadas anteriormente o abrir un issue en este repositorio. ¡Espero que disfrutes utilizando BirthdayApp para recordar los cumpleaños de tus seres queridos!
+## Troubleshooting (rápido)
+
+* **Metro**: si notas comportamiento extraño, reinicia con caché limpio
+  `npm run start -- --reset-cache`
+* **Gradle/JDK**: usa **Java 11** para RN 0.70.x.
+* **Builds**: limpia antes de reconstruir
+  `cd android && ./gradlew clean`
+
+---
+
+## Licencia
+
+Distribuido bajo **Apache License 2.0**. Consulta [LICENSE](LICENSE) para más detalles.
+
+---
