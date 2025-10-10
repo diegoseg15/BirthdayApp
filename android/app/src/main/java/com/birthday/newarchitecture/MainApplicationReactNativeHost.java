@@ -1,4 +1,4 @@
-package com.birthday.newarchitecture;
+package com.byteflow.birthdayapp.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.birthday.BuildConfig;
-import com.birthday.newarchitecture.components.MainComponentsRegistry;
-import com.birthday.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.byteflow.birthdayapp.BuildConfig;
+import com.byteflow.birthdayapp.newarchitecture.components.MainComponentsRegistry;
+import com.byteflow.birthdayapp.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

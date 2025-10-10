@@ -35,12 +35,12 @@ android_library(
 
 android_build_config(
     name = "build_config",
-    package = "com.birthday",
+    package = "com.byteflow.birthdayapp",
 )
 
 android_resource(
     name = "res",
-    package = "com.birthday",
+    package = "com.byteflow.birthdayapp",
     res = "src/main/res",
 )
 

@@ -1,4 +1,4 @@
-package com.birthday;
+package com.byteflow.birthdayapp;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

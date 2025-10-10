@@ -1,4 +1,4 @@
-package com.birthday.newarchitecture.modules;
+package com.byteflow.birthdayapp.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;
