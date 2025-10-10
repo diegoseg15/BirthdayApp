@@ -50,6 +50,7 @@ android/.gradle/
 android/.idea/
 android/local.properties
 android/.cxx/
+android/keystore.properties
 *.iml
 *.hprof
 
