@@ -139,6 +139,7 @@ export default function Birthday({
           <ListBirthday
             userId={user.uid}
             theme={theme}
+            notificationsEnabled={appSettings.notificationsEnabled}
             onEditBirthday={openEditBirthday}
           />
         ) : (
