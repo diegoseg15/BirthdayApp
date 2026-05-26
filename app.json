@@ -1,24 +1,29 @@
 {
   "expo": {
-    "name": "BirthdayAppV2",
-    "slug": "BirthdayAppV2",
-    "version": "1.0.0",
+    "name": "BirthdayApp",
+    "slug": "birthday-app",
+    "version": "1.0.1",
     "orientation": "portrait",
+    "scheme": "birthdayapp",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.diegoseg.birthdayapp"
     },
     "android": {
+      "package": "com.diegoseg.birthdayapp",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#15212B",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     }
   }
 }
