@@ -5,12 +5,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   Timestamp,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 
 import { db } from "../utils/firebase";
@@ -21,6 +23,10 @@ import {
 
 function getBirthdaysCollection(userId) {
   return collection(db, "users", userId, "birthdays");
+}
+
+function getLegacyBirthdaysCollection(userId) {
+  return collection(db, userId);
 }
 
 export function listenBirthdays(userId, callback, onError) {
@@ -43,6 +49,72 @@ export function listenBirthdays(userId, callback, onError) {
   );
 }
 
+export async function migrateLegacyBirthdays(userId) {
+  const legacySnapshot = await getDocs(getLegacyBirthdaysCollection(userId));
+
+  if (legacySnapshot.empty) {
+    return {
+      migrated: 0,
+      skipped: 0,
+    };
+  }
+
+  const currentSnapshot = await getDocs(getBirthdaysCollection(userId));
+  const currentBirthdayIds = new Set(
+    currentSnapshot.docs.map((document) => document.id),
+  );
+
+  const batch = writeBatch(db);
+  let migrated = 0;
+  let skipped = 0;
+
+  legacySnapshot.docs.forEach((legacyDocument) => {
+    const legacyData = legacyDocument.data();
+
+    const hasRequiredFields =
+      legacyData.name && legacyData.lastname && legacyData.dateBirth;
+
+    if (!hasRequiredFields || currentBirthdayIds.has(legacyDocument.id)) {
+      skipped += 1;
+      return;
+    }
+
+    const newBirthdayRef = doc(
+      db,
+      "users",
+      userId,
+      "birthdays",
+      legacyDocument.id,
+    );
+
+    batch.set(
+      newBirthdayRef,
+      {
+        name: legacyData.name,
+        lastname: legacyData.lastname,
+        dateBirth: legacyData.dateBirth,
+        notificationId: legacyData.notificationId || null,
+        migratedFromLegacy: true,
+        legacyId: legacyDocument.id,
+        createdAt: legacyData.createdAt || serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+
+    migrated += 1;
+  });
+
+  if (migrated > 0) {
+    await batch.commit();
+  }
+
+  return {
+    migrated,
+    skipped,
+  };
+}
+
 export async function createBirthday(userId, birthdayData) {
   const cleanName = birthdayData.name.trim();
   const cleanLastname = birthdayData.lastname.trim();
@@ -53,6 +125,7 @@ export async function createBirthday(userId, birthdayData) {
     lastname: cleanLastname,
     dateBirth: birthdayDate,
     notificationId: null,
+    migratedFromLegacy: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
