@@ -1,14 +1,16 @@
 // src/utils/date.js
 
-export function formatDate(dateValue) {
+export function formatDate(dateValue, options = {}) {
   const date = getDateFromFirestoreValue(dateValue);
 
   if (!date) return "Fecha no disponible";
 
+  const hasBirthYear = options.hasBirthYear ?? true;
+
   return new Intl.DateTimeFormat(undefined, {
     day: "2-digit",
     month: "long",
-    year: "numeric",
+    ...(hasBirthYear ? { year: "numeric" } : {}),
   }).format(date);
 }
 
@@ -26,10 +28,13 @@ export function getDateFromFirestoreValue(dateValue) {
   return null;
 }
 
-export function getNextBirthdayInfo(dateValue) {
-  const birthDate = getDateFromFirestoreValue(dateValue);
+export function getNextBirthdayInfo(dateValue, birthday = {}) {
+  const fallbackDate = getDateFromFirestoreValue(dateValue);
 
-  if (!birthDate) {
+  const month = birthday.birthMonth || (fallbackDate?.getMonth() ?? null) + 1;
+  const day = birthday.birthDay || fallbackDate?.getDate();
+
+  if (!month || !day) {
     return {
       daysLeft: null,
       label: "Sin fecha",
@@ -39,11 +44,7 @@ export function getNextBirthdayInfo(dateValue) {
   const today = new Date();
   const currentYear = today.getFullYear();
 
-  const nextBirthday = new Date(
-    currentYear,
-    birthDate.getMonth(),
-    birthDate.getDate(),
-  );
+  const nextBirthday = new Date(currentYear, month - 1, day);
 
   today.setHours(0, 0, 0, 0);
   nextBirthday.setHours(0, 0, 0, 0);

@@ -128,7 +128,7 @@ export default function ListBirthday({ userId, theme }) {
 }
 
 function BirthdayCard({ birthday, styles, onDelete }) {
-  const birthdayInfo = getNextBirthdayInfo(birthday.dateBirth);
+  const birthdayInfo = getNextBirthdayInfo(birthday.dateBirth, birthday);
   const hasReminder = Boolean(birthday.notificationId);
 
   return (
@@ -145,7 +145,11 @@ function BirthdayCard({ birthday, styles, onDelete }) {
             {birthday.name} {birthday.lastname}
           </Text>
 
-          <Text style={styles.date}>{formatDate(birthday.dateBirth)}</Text>
+          <Text style={styles.date}>
+            {formatDate(birthday.dateBirth, {
+              hasBirthYear: birthday.hasBirthYear ?? true,
+            })}
+          </Text>
         </View>
       </View>
 

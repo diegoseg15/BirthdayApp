@@ -21,12 +21,28 @@ import {
   scheduleBirthdayReminder,
 } from "./notificationService";
 
+const FALLBACK_BIRTH_YEAR = 2000;
+
 function getBirthdaysCollection(userId) {
   return collection(db, "users", userId, "birthdays");
 }
 
 function getLegacyBirthdaysCollection(userId) {
   return collection(db, userId);
+}
+
+function normalizeBirthdayDate(date, hasBirthYear) {
+  if (hasBirthYear) return date;
+
+  return new Date(
+    FALLBACK_BIRTH_YEAR,
+    date.getMonth(),
+    date.getDate(),
+    12,
+    0,
+    0,
+    0,
+  );
 }
 
 export function listenBirthdays(userId, callback, onError) {
@@ -79,6 +95,10 @@ export async function migrateLegacyBirthdays(userId) {
       return;
     }
 
+    const date = legacyData.dateBirth?.toDate
+      ? legacyData.dateBirth.toDate()
+      : null;
+
     const newBirthdayRef = doc(
       db,
       "users",
@@ -93,6 +113,9 @@ export async function migrateLegacyBirthdays(userId) {
         name: legacyData.name,
         lastname: legacyData.lastname,
         dateBirth: legacyData.dateBirth,
+        birthDay: date ? date.getDate() : null,
+        birthMonth: date ? date.getMonth() + 1 : null,
+        hasBirthYear: true,
         notificationId: legacyData.notificationId || null,
         migratedFromLegacy: true,
         legacyId: legacyDocument.id,
@@ -122,12 +145,20 @@ export async function createBirthday(
 ) {
   const cleanName = birthdayData.name.trim();
   const cleanLastname = birthdayData.lastname.trim();
-  const birthdayDate = Timestamp.fromDate(birthdayData.dateBirth);
+  const hasBirthYear = Boolean(birthdayData.hasBirthYear);
+  const normalizedDate = normalizeBirthdayDate(
+    birthdayData.dateBirth,
+    hasBirthYear,
+  );
 
   const birthdayRef = await addDoc(getBirthdaysCollection(userId), {
     name: cleanName,
     lastname: cleanLastname,
-    dateBirth: birthdayDate,
+    dateBirth: Timestamp.fromDate(normalizedDate),
+    birthDay: normalizedDate.getDate(),
+    birthMonth: normalizedDate.getMonth() + 1,
+    birthYear: hasBirthYear ? normalizedDate.getFullYear() : null,
+    hasBirthYear,
     notificationId: null,
     migratedFromLegacy: false,
     createdAt: serverTimestamp(),
@@ -142,7 +173,7 @@ export async function createBirthday(
     birthdayId: birthdayRef.id,
     name: cleanName,
     lastname: cleanLastname,
-    dateBirth: birthdayData.dateBirth,
+    dateBirth: normalizedDate,
   });
 
   if (notificationId) {
