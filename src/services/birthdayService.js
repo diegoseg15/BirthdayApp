@@ -115,7 +115,11 @@ export async function migrateLegacyBirthdays(userId) {
   };
 }
 
-export async function createBirthday(userId, birthdayData) {
+export async function createBirthday(
+  userId,
+  birthdayData,
+  options = { notificationsEnabled: true },
+) {
   const cleanName = birthdayData.name.trim();
   const cleanLastname = birthdayData.lastname.trim();
   const birthdayDate = Timestamp.fromDate(birthdayData.dateBirth);
@@ -129,6 +133,10 @@ export async function createBirthday(userId, birthdayData) {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+
+  if (!options.notificationsEnabled) {
+    return birthdayRef;
+  }
 
   const notificationId = await scheduleBirthdayReminder({
     birthdayId: birthdayRef.id,
@@ -145,6 +153,70 @@ export async function createBirthday(userId, birthdayData) {
   }
 
   return birthdayRef;
+}
+
+export async function enableBirthdayRemindersForUser(userId) {
+  const snapshot = await getDocs(getBirthdaysCollection(userId));
+  const batch = writeBatch(db);
+  let enabled = 0;
+
+  for (const birthdayDocument of snapshot.docs) {
+    const birthday = {
+      id: birthdayDocument.id,
+      ...birthdayDocument.data(),
+    };
+
+    if (birthday.notificationId) continue;
+
+    const notificationId = await scheduleBirthdayReminder({
+      birthdayId: birthday.id,
+      name: birthday.name,
+      lastname: birthday.lastname,
+      dateBirth: birthday.dateBirth,
+    });
+
+    if (!notificationId) continue;
+
+    batch.update(birthdayDocument.ref, {
+      notificationId,
+      updatedAt: serverTimestamp(),
+    });
+
+    enabled += 1;
+  }
+
+  if (enabled > 0) {
+    await batch.commit();
+  }
+
+  return enabled;
+}
+
+export async function disableBirthdayRemindersForUser(userId) {
+  const snapshot = await getDocs(getBirthdaysCollection(userId));
+  const batch = writeBatch(db);
+  let disabled = 0;
+
+  for (const birthdayDocument of snapshot.docs) {
+    const birthday = birthdayDocument.data();
+
+    if (!birthday.notificationId) continue;
+
+    await cancelBirthdayReminder(birthday.notificationId);
+
+    batch.update(birthdayDocument.ref, {
+      notificationId: null,
+      updatedAt: serverTimestamp(),
+    });
+
+    disabled += 1;
+  }
+
+  if (disabled > 0) {
+    await batch.commit();
+  }
+
+  return disabled;
 }
 
 export async function removeBirthday(userId, birthdayId, notificationId) {
