@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
 
-export default function ListBirthday({ userId, theme }) {
+export default function ListBirthday({ userId, theme, onEditBirthday }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [birthdays, setBirthdays] = useState([]);
@@ -120,6 +120,8 @@ export default function ListBirthday({ userId, theme }) {
         <BirthdayCard
           birthday={item}
           styles={styles}
+          theme={theme}
+          onEdit={() => onEditBirthday(item)}
           onDelete={() => confirmDelete(item)}
         />
       )}
@@ -127,9 +129,9 @@ export default function ListBirthday({ userId, theme }) {
   );
 }
 
-function BirthdayCard({ birthday, styles, onDelete }) {
+function BirthdayCard({ birthday, styles, theme, onEdit, onDelete }) {
   const birthdayInfo = getNextBirthdayInfo(birthday.dateBirth, birthday);
-  const hasReminder = Boolean(birthday.notificationId);
+  const reminder = getReminderPresentation(birthday);
 
   return (
     <View style={styles.card}>
@@ -158,30 +160,34 @@ function BirthdayCard({ birthday, styles, onDelete }) {
           <Text style={styles.badgeText}>{birthdayInfo.label}</Text>
         </View>
 
-        <View
-          style={[
-            styles.reminderBadge,
-            !hasReminder && styles.reminderBadgeDisabled,
-          ]}
-        >
+        <View style={[styles.reminderBadge, styles[reminder.styleKey]]}>
           <Text
-            style={[
-              styles.reminderBadgeText,
-              !hasReminder && styles.reminderBadgeTextDisabled,
-            ]}
+            style={[styles.reminderBadgeText, styles[reminder.textStyleKey]]}
           >
-            {hasReminder ? "Recordatorio activo" : "Sin recordatorio"}
+            {reminder.label}
           </Text>
         </View>
       </View>
 
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={onDelete}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.deleteButtonText}>Eliminar</Text>
-      </TouchableOpacity>
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={onEdit}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="create-outline" size={17} color={theme.colors.text} />
+          <Text style={styles.editButtonText}>Editar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={onDelete}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="trash-outline" size={17} color={theme.colors.text} />
+          <Text style={styles.deleteButtonText}>Eliminar</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -199,6 +205,30 @@ function EmptyState({ styles, theme }) {
       </Text>
     </View>
   );
+}
+
+function getReminderPresentation(birthday) {
+  if (birthday.notificationId || birthday.reminderStatus === "scheduled") {
+    return {
+      label: "Recordatorio activo",
+      styleKey: "reminderBadgeActive",
+      textStyleKey: "reminderBadgeTextActive",
+    };
+  }
+
+  if (birthday.reminderStatus === "disabled") {
+    return {
+      label: "Recordatorio desactivado",
+      styleKey: "reminderBadgeDisabled",
+      textStyleKey: "reminderBadgeTextDisabled",
+    };
+  }
+
+  return {
+    label: "Recordatorio no disponible",
+    styleKey: "reminderBadgeUnavailable",
+    textStyleKey: "reminderBadgeTextUnavailable",
+  };
 }
 
 function createStyles(theme) {
@@ -295,25 +325,58 @@ function createStyles(theme) {
       borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: theme.colors.successSoft,
       paddingHorizontal: 12,
+    },
+    reminderBadgeActive: {
+      backgroundColor: theme.colors.successSoft,
     },
     reminderBadgeDisabled: {
       backgroundColor: theme.colors.surfaceAlt,
     },
+    reminderBadgeUnavailable: {
+      backgroundColor: theme.colors.primarySoft,
+    },
     reminderBadgeText: {
-      color: theme.colors.success,
       fontSize: 13,
       fontWeight: "800",
+    },
+    reminderBadgeTextActive: {
+      color: theme.colors.success,
     },
     reminderBadgeTextDisabled: {
       color: theme.colors.textMuted,
     },
-    deleteButton: {
+    reminderBadgeTextUnavailable: {
+      color: theme.colors.primary,
+    },
+    actions: {
+      flexDirection: "row",
+      gap: 10,
+    },
+    editButton: {
+      flex: 1,
       minHeight: 44,
       borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
+      flexDirection: "row",
+      gap: 6,
+      backgroundColor: theme.colors.surfaceAlt,
+      paddingHorizontal: 14,
+    },
+    editButtonText: {
+      color: theme.colors.text,
+      fontSize: 13,
+      fontWeight: "800",
+    },
+    deleteButton: {
+      flex: 1,
+      minHeight: 44,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+      gap: 6,
       backgroundColor: theme.colors.surfaceAlt,
       paddingHorizontal: 14,
     },
