@@ -1,16 +1,36 @@
 // src/components/Birthday.js
 
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { logout } from "../services/authService";
-import { migrateLegacyBirthdays } from "../services/birthdayService";
+import {
+  disableBirthdayRemindersForUser,
+  enableBirthdayRemindersForUser,
+  migrateLegacyBirthdays,
+} from "../services/birthdayService";
 import ActionBar from "./ActionBar";
 import AddBirthday from "./AddBirthday";
 import ListBirthday from "./ListBirthday";
+import Settings from "./Settings";
 
-export default function Birthday({ user }) {
+const SECTIONS = {
+  BIRTHDAYS: "birthdays",
+  SETTINGS: "settings",
+};
+
+export default function Birthday({
+  user,
+  theme,
+  appSettings,
+  deviceLanguage,
+  onChangeThemeMode,
+  onChangeNotificationsEnabled,
+}) {
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const [activeSection, setActiveSection] = useState(SECTIONS.BIRTHDAYS);
   const [isAddBirthdayVisible, setIsAddBirthdayVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [migrationMessage, setMigrationMessage] = useState("");
@@ -71,13 +91,32 @@ export default function Birthday({ user }) {
     }
   };
 
+  const handleChangeNotifications = async (enabled) => {
+    await onChangeNotificationsEnabled(enabled);
+
+    try {
+      if (enabled) {
+        await enableBirthdayRemindersForUser(user.uid);
+        return;
+      }
+
+      await disableBirthdayRemindersForUser(user.uid);
+    } catch {
+      Alert.alert(
+        "Aviso",
+        "La preferencia se guardó, pero no se pudieron actualizar todos los recordatorios existentes.",
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "right", "left"]}>
       <ActionBar
+        theme={theme}
         userEmail={user.email}
+        activeSection={activeSection}
+        onChangeSection={setActiveSection}
         onOpenAddBirthday={openAddBirthday}
-        onLogout={handleLogout}
-        isLoggingOut={isLoggingOut}
       />
 
       {migrationMessage ? (
@@ -92,52 +131,69 @@ export default function Birthday({ user }) {
         </View>
       ) : null}
 
-      <ListBirthday userId={user.uid} />
+      {activeSection === SECTIONS.BIRTHDAYS ? (
+        <ListBirthday userId={user.uid} theme={theme} />
+      ) : (
+        <Settings
+          user={user}
+          theme={theme}
+          appSettings={appSettings}
+          deviceLanguage={deviceLanguage}
+          onChangeThemeMode={onChangeThemeMode}
+          onChangeNotificationsEnabled={handleChangeNotifications}
+          onLogout={handleLogout}
+          isLoggingOut={isLoggingOut}
+        />
+      )}
 
       <AddBirthday
         visible={isAddBirthdayVisible}
         userId={user.uid}
+        theme={theme}
+        notificationsEnabled={appSettings.notificationsEnabled}
         onClose={closeAddBirthday}
       />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#15212B",
-  },
-  successBanner: {
-    marginHorizontal: 22,
-    marginTop: 14,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "rgba(34,197,94,0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(134,239,172,0.26)",
-  },
-  successBannerText: {
-    color: "#86EFAC",
-    fontSize: 13,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-  errorBanner: {
-    marginHorizontal: 22,
-    marginTop: 14,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "rgba(239,68,68,0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(252,165,165,0.26)",
-  },
-  errorBannerText: {
-    color: "#FCA5A5",
-    fontSize: 13,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    successBanner: {
+      marginHorizontal: 22,
+      marginTop: 14,
+      borderRadius: 16,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      backgroundColor: theme.colors.successSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.success,
+    },
+    successBannerText: {
+      color: theme.colors.success,
+      fontSize: 13,
+      fontWeight: "800",
+      textAlign: "center",
+    },
+    errorBanner: {
+      marginHorizontal: 22,
+      marginTop: 14,
+      borderRadius: 16,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      backgroundColor: theme.colors.dangerSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.danger,
+    },
+    errorBannerText: {
+      color: theme.colors.danger,
+      fontSize: 13,
+      fontWeight: "800",
+      textAlign: "center",
+    },
+  });
+}
