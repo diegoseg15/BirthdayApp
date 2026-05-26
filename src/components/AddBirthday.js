@@ -1,6 +1,6 @@
 // src/components/AddBirthday.js
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -23,7 +23,15 @@ const DEFAULT_FORM = {
   dateBirth: new Date(),
 };
 
-export default function AddBirthday({ visible, userId, onClose }) {
+export default function AddBirthday({
+  visible,
+  userId,
+  theme,
+  notificationsEnabled,
+  onClose,
+}) {
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const [formData, setFormData] = useState(DEFAULT_FORM);
   const [formError, setFormError] = useState({});
   const [generalError, setGeneralError] = useState("");
@@ -76,7 +84,9 @@ export default function AddBirthday({ visible, userId, onClose }) {
       setIsSaving(true);
       setGeneralError("");
 
-      await createBirthday(userId, formData);
+      await createBirthday(userId, formData, {
+        notificationsEnabled,
+      });
 
       resetForm();
       onClose();
@@ -114,7 +124,7 @@ export default function AddBirthday({ visible, userId, onClose }) {
           <TextInput
             style={[styles.input, formError.name && styles.inputError]}
             placeholder="Nombre"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={theme.colors.textSubtle}
             value={formData.name}
             onChangeText={(value) => updateForm("name", value)}
           />
@@ -122,7 +132,7 @@ export default function AddBirthday({ visible, userId, onClose }) {
           <TextInput
             style={[styles.input, formError.lastname && styles.inputError]}
             placeholder="Apellido"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={theme.colors.textSubtle}
             value={formData.lastname}
             onChangeText={(value) => updateForm("lastname", value)}
           />
@@ -142,6 +152,14 @@ export default function AddBirthday({ visible, userId, onClose }) {
               </Text>
             </View>
           </TouchableOpacity>
+
+          <View style={styles.reminderInfo}>
+            <Text style={styles.reminderInfoText}>
+              {notificationsEnabled
+                ? "Se intentará crear un recordatorio automático."
+                : "Los recordatorios están desactivados en configuración."}
+            </Text>
+          </View>
 
           {generalError ? (
             <Text style={styles.errorText}>{generalError}</Text>
@@ -186,109 +204,124 @@ export default function AddBirthday({ visible, userId, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 22,
-    backgroundColor: "rgba(0,0,0,0.62)",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  modalCard: {
-    borderRadius: 28,
-    padding: 22,
-    backgroundColor: "#1E3040",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  title: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "900",
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: "#CBD5E1",
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  input: {
-    height: 52,
-    color: "#FFFFFF",
-    backgroundColor: "#15212B",
-    borderRadius: 18,
-    paddingHorizontal: 18,
-    marginBottom: 14,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  inputError: {
-    borderColor: "#EF4444",
-  },
-  dateButton: {
-    minHeight: 62,
-    justifyContent: "center",
-    backgroundColor: "#15212B",
-    borderRadius: 18,
-    paddingHorizontal: 18,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  dateLabel: {
-    color: "#94A3B8",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
-  dateValue: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  errorText: {
-    color: "#FCA5A5",
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  footer: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 4,
-  },
-  cancelButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#334155",
-  },
-  cancelButtonText: {
-    color: "#E2E8F0",
-    fontSize: 15,
-    fontWeight: "800",
-  },
-  saveButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F97316",
-  },
-  disabledButton: {
-    opacity: 0.7,
-  },
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "800",
-  },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: "center",
+      paddingHorizontal: 22,
+      backgroundColor: theme.colors.overlay,
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    modalCard: {
+      borderRadius: 28,
+      padding: 22,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 24,
+      fontWeight: "900",
+      marginBottom: 8,
+    },
+    subtitle: {
+      color: theme.colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+      marginBottom: 20,
+    },
+    input: {
+      height: 52,
+      color: theme.colors.text,
+      backgroundColor: theme.colors.input,
+      borderRadius: 18,
+      paddingHorizontal: 18,
+      marginBottom: 14,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    inputError: {
+      borderColor: theme.colors.danger,
+    },
+    dateButton: {
+      minHeight: 62,
+      justifyContent: "center",
+      backgroundColor: theme.colors.input,
+      borderRadius: 18,
+      paddingHorizontal: 18,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    dateLabel: {
+      color: theme.colors.textSubtle,
+      fontSize: 12,
+      fontWeight: "700",
+      textTransform: "uppercase",
+      marginBottom: 4,
+    },
+    dateValue: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    reminderInfo: {
+      borderRadius: 14,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      backgroundColor: theme.colors.primarySoft,
+      marginBottom: 14,
+    },
+    reminderInfoText: {
+      color: theme.colors.primary,
+      fontSize: 13,
+      fontWeight: "800",
+      lineHeight: 18,
+    },
+    errorText: {
+      color: theme.colors.danger,
+      fontSize: 14,
+      lineHeight: 20,
+      marginBottom: 14,
+    },
+    footer: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 4,
+    },
+    cancelButton: {
+      flex: 1,
+      height: 52,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.surfaceAlt,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontSize: 15,
+      fontWeight: "800",
+    },
+    saveButton: {
+      flex: 1,
+      height: 52,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.primary,
+    },
+    disabledButton: {
+      opacity: 0.7,
+    },
+    saveButtonText: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "800",
+    },
+  });
+}
