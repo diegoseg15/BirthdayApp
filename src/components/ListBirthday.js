@@ -200,7 +200,7 @@ function createStyles(theme) {
   return StyleSheet.create({
     listContent: {
       padding: 22,
-      paddingBottom: 40,
+      paddingBottom: 132,
       backgroundColor: theme.colors.background,
     },
     emptyListContent: {
