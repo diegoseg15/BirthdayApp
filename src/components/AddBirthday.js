@@ -4,23 +4,26 @@ import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import { createBirthday } from "../services/birthdayService";
-import { formatDate } from "../utils/date";
+
+const FALLBACK_BIRTH_YEAR = 2000;
 
 const DEFAULT_FORM = {
   name: "",
   lastname: "",
-  dateBirth: new Date(),
+  birthDay: "",
+  birthMonth: "",
+  birthYear: "",
+  hasBirthYear: false,
 };
 
 export default function AddBirthday({
@@ -36,12 +39,16 @@ export default function AddBirthday({
   const [formError, setFormError] = useState({});
   const [generalError, setGeneralError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
   const updateForm = (field, value) => {
+    const numericFields = ["birthDay", "birthMonth", "birthYear"];
+    const nextValue = numericFields.includes(field)
+      ? value.replace(/[^0-9]/g, "")
+      : value;
+
     setFormData((currentForm) => ({
       ...currentForm,
-      [field]: value,
+      [field]: nextValue,
     }));
 
     setFormError((currentErrors) => ({
@@ -52,11 +59,25 @@ export default function AddBirthday({
     setGeneralError("");
   };
 
+  const toggleBirthYear = (value) => {
+    setFormData((currentForm) => ({
+      ...currentForm,
+      hasBirthYear: value,
+      birthYear: value ? currentForm.birthYear : "",
+    }));
+
+    setFormError((currentErrors) => ({
+      ...currentErrors,
+      birthYear: false,
+    }));
+
+    setGeneralError("");
+  };
+
   const resetForm = () => {
     setFormData(DEFAULT_FORM);
     setFormError({});
     setGeneralError("");
-    setIsDatePickerVisible(false);
   };
 
   const closeModal = () => {
@@ -67,26 +88,47 @@ export default function AddBirthday({
   };
 
   const saveBirthday = async () => {
-    const errors = {};
+    const validation = validateBirthdayForm(formData);
 
-    if (!formData.name.trim()) errors.name = true;
-    if (!formData.lastname.trim()) errors.lastname = true;
-    if (!formData.dateBirth) errors.dateBirth = true;
+    setFormError(validation.errors);
 
-    setFormError(errors);
-
-    if (Object.keys(errors).length > 0) {
-      setGeneralError("Completa todos los campos.");
+    if (!validation.isValid) {
+      setGeneralError(validation.message);
       return;
     }
+
+    const birthDay = Number(formData.birthDay);
+    const birthMonth = Number(formData.birthMonth);
+    const birthYear = formData.hasBirthYear
+      ? Number(formData.birthYear)
+      : FALLBACK_BIRTH_YEAR;
+
+    const dateBirth = new Date(
+      birthYear,
+      birthMonth - 1,
+      birthDay,
+      12,
+      0,
+      0,
+      0,
+    );
 
     try {
       setIsSaving(true);
       setGeneralError("");
 
-      await createBirthday(userId, formData, {
-        notificationsEnabled,
-      });
+      await createBirthday(
+        userId,
+        {
+          name: formData.name,
+          lastname: formData.lastname,
+          dateBirth,
+          hasBirthYear: formData.hasBirthYear,
+        },
+        {
+          notificationsEnabled,
+        },
+      );
 
       resetForm();
       onClose();
@@ -97,11 +139,6 @@ export default function AddBirthday({
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleConfirmDate = (selectedDate) => {
-    updateForm("dateBirth", selectedDate);
-    setIsDatePickerVisible(false);
   };
 
   return (
@@ -118,7 +155,7 @@ export default function AddBirthday({
         <View style={styles.modalCard}>
           <Text style={styles.title}>Nuevo cumpleaños</Text>
           <Text style={styles.subtitle}>
-            Guarda la fecha de una persona importante.
+            Guarda día y mes. El año es opcional.
           </Text>
 
           <TextInput
@@ -137,21 +174,76 @@ export default function AddBirthday({
             onChangeText={(value) => updateForm("lastname", value)}
           />
 
-          <TouchableOpacity
-            style={[
-              styles.dateButton,
-              formError.dateBirth && styles.inputError,
-            ]}
-            onPress={() => setIsDatePickerVisible(true)}
-            activeOpacity={0.85}
-          >
-            <View>
-              <Text style={styles.dateLabel}>Fecha de nacimiento</Text>
-              <Text style={styles.dateValue}>
-                {formatDate(formData.dateBirth)}
+          <View style={styles.dateGrid}>
+            <View style={styles.dateField}>
+              <Text style={styles.dateLabel}>Día</Text>
+              <TextInput
+                style={[
+                  styles.dateInput,
+                  formError.birthDay && styles.inputError,
+                ]}
+                placeholder="DD"
+                placeholderTextColor={theme.colors.textSubtle}
+                keyboardType="number-pad"
+                maxLength={2}
+                value={formData.birthDay}
+                onChangeText={(value) => updateForm("birthDay", value)}
+              />
+            </View>
+
+            <View style={styles.dateField}>
+              <Text style={styles.dateLabel}>Mes</Text>
+              <TextInput
+                style={[
+                  styles.dateInput,
+                  formError.birthMonth && styles.inputError,
+                ]}
+                placeholder="MM"
+                placeholderTextColor={theme.colors.textSubtle}
+                keyboardType="number-pad"
+                maxLength={2}
+                value={formData.birthMonth}
+                onChangeText={(value) => updateForm("birthMonth", value)}
+              />
+            </View>
+
+            {formData.hasBirthYear ? (
+              <View style={styles.dateFieldLarge}>
+                <Text style={styles.dateLabel}>Año</Text>
+                <TextInput
+                  style={[
+                    styles.dateInput,
+                    formError.birthYear && styles.inputError,
+                  ]}
+                  placeholder="AAAA"
+                  placeholderTextColor={theme.colors.textSubtle}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  value={formData.birthYear}
+                  onChangeText={(value) => updateForm("birthYear", value)}
+                />
+              </View>
+            ) : null}
+          </View>
+
+          <View style={styles.switchRow}>
+            <View style={styles.switchTextBlock}>
+              <Text style={styles.switchTitle}>Incluir año</Text>
+              <Text style={styles.switchDescription}>
+                Actívalo solo si quieres guardar la fecha completa.
               </Text>
             </View>
-          </TouchableOpacity>
+
+            <Switch
+              value={formData.hasBirthYear}
+              onValueChange={toggleBirthYear}
+              thumbColor={
+                formData.hasBirthYear
+                  ? theme.colors.primary
+                  : theme.colors.textSubtle
+              }
+            />
+          </View>
 
           <View style={styles.reminderInfo}>
             <Text style={styles.reminderInfoText}>
@@ -190,18 +282,86 @@ export default function AddBirthday({
           </View>
         </View>
       </View>
-
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        date={formData.dateBirth}
-        maximumDate={new Date()}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-        onConfirm={handleConfirmDate}
-        onCancel={() => setIsDatePickerVisible(false)}
-      />
     </Modal>
   );
+}
+
+function validateBirthdayForm(formData) {
+  const errors = {};
+
+  const cleanName = formData.name.trim();
+  const cleanLastname = formData.lastname.trim();
+
+  const birthDay = Number(formData.birthDay);
+  const birthMonth = Number(formData.birthMonth);
+  const birthYear = formData.hasBirthYear
+    ? Number(formData.birthYear)
+    : FALLBACK_BIRTH_YEAR;
+
+  if (!cleanName) errors.name = true;
+  if (!cleanLastname) errors.lastname = true;
+
+  if (!formData.birthDay || birthDay < 1 || birthDay > 31) {
+    errors.birthDay = true;
+  }
+
+  if (!formData.birthMonth || birthMonth < 1 || birthMonth > 12) {
+    errors.birthMonth = true;
+  }
+
+  if (formData.hasBirthYear) {
+    const currentYear = new Date().getFullYear();
+
+    if (!formData.birthYear || birthYear < 1900 || birthYear > currentYear) {
+      errors.birthYear = true;
+    }
+  }
+
+  if (
+    !errors.birthDay &&
+    !errors.birthMonth &&
+    !errors.birthYear &&
+    !isValidCalendarDate(birthDay, birthMonth, birthYear)
+  ) {
+    errors.birthDay = true;
+    errors.birthMonth = true;
+  }
+
+  if (Object.keys(errors).length === 0) {
+    return {
+      isValid: true,
+      errors,
+      message: "",
+    };
+  }
+
+  return {
+    isValid: false,
+    errors,
+    message: getValidationMessage(errors),
+  };
+}
+
+function isValidCalendarDate(day, month, year) {
+  const date = new Date(year, month - 1, day);
+
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+function getValidationMessage(errors) {
+  if (errors.name || errors.lastname) {
+    return "Completa el nombre y apellido.";
+  }
+
+  if (errors.birthYear) {
+    return "Ingresa un año válido.";
+  }
+
+  return "Ingresa un día y mes válidos.";
 }
 
 function createStyles(theme) {
@@ -248,27 +408,63 @@ function createStyles(theme) {
     inputError: {
       borderColor: theme.colors.danger,
     },
-    dateButton: {
-      minHeight: 62,
-      justifyContent: "center",
-      backgroundColor: theme.colors.input,
-      borderRadius: 18,
-      paddingHorizontal: 18,
+    dateGrid: {
+      flexDirection: "row",
+      gap: 10,
       marginBottom: 14,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
+    },
+    dateField: {
+      flex: 1,
+    },
+    dateFieldLarge: {
+      flex: 1.4,
     },
     dateLabel: {
       color: theme.colors.textSubtle,
       fontSize: 12,
-      fontWeight: "700",
+      fontWeight: "900",
       textTransform: "uppercase",
+      marginBottom: 7,
+      marginLeft: 2,
+    },
+    dateInput: {
+      height: 52,
+      color: theme.colors.text,
+      backgroundColor: theme.colors.input,
+      borderRadius: 18,
+      paddingHorizontal: 16,
+      fontSize: 16,
+      fontWeight: "800",
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    switchRow: {
+      minHeight: 64,
+      borderRadius: 18,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: theme.colors.input,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      marginBottom: 14,
+    },
+    switchTextBlock: {
+      flex: 1,
+    },
+    switchTitle: {
+      color: theme.colors.text,
+      fontSize: 15,
+      fontWeight: "900",
       marginBottom: 4,
     },
-    dateValue: {
-      color: theme.colors.text,
-      fontSize: 16,
-      fontWeight: "700",
+    switchDescription: {
+      color: theme.colors.textMuted,
+      fontSize: 13,
+      lineHeight: 18,
     },
     reminderInfo: {
       borderRadius: 14,
