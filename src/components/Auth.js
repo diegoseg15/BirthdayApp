@@ -1,6 +1,6 @@
 // src/components/Auth.js
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,10 +11,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import BrandLogo from "./BrandLogo";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 
-export default function Auth() {
+export default function Auth({ theme }) {
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [isLogin, setIsLogin] = useState(true);
 
   const changeForm = () => {
@@ -33,16 +35,20 @@ export default function Auth() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <View style={styles.logoMark}>
-              <Text style={styles.logoText}>B</Text>
-            </View>
+            <BrandLogo
+              theme={theme}
+              size={96}
+              rounded={30}
+              showBackground={false}
+            />
 
-            <Text style={styles.title}>BirthdayApp</Text>
+            <Text style={styles.title}>Rimind</Text>
             <Text style={styles.subtitle}>
-              Guarda cumpleaños importantes y mantén tus recordatorios
-              organizados.
+              Recuerda cumpleaños, fechas importantes y momentos que no quieres
+              olvidar.
             </Text>
           </View>
 
@@ -59,57 +65,47 @@ export default function Auth() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#15212B",
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 28,
-  },
-  logoMark: {
-    width: 84,
-    height: 84,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F97316",
-    marginBottom: 18,
-  },
-  logoText: {
-    color: "#FFFFFF",
-    fontSize: 42,
-    fontWeight: "900",
-  },
-  title: {
-    color: "#FFFFFF",
-    fontSize: 34,
-    fontWeight: "800",
-    marginBottom: 10,
-  },
-  subtitle: {
-    color: "#CBD5E1",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "center",
-    maxWidth: 320,
-  },
-  card: {
-    width: "100%",
-    borderRadius: 28,
-    padding: 22,
-    backgroundColor: "#1E3040",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    keyboardView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingHorizontal: 24,
+      paddingVertical: 32,
+    },
+    header: {
+      alignItems: "center",
+      marginBottom: 28,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 36,
+      fontWeight: "900",
+      marginTop: 16,
+      marginBottom: 10,
+      letterSpacing: -0.5,
+    },
+    subtitle: {
+      color: theme.colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "center",
+      maxWidth: 330,
+    },
+    card: {
+      width: "100%",
+      borderRadius: 28,
+      padding: 22,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+  });
+}
