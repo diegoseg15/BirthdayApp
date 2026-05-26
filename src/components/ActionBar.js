@@ -59,7 +59,7 @@ export default function ActionBar({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 22,
-    paddingTop: 18,
+    paddingTop: 14,
     paddingBottom: 16,
     backgroundColor: "#15212B",
     borderBottomWidth: 1,
