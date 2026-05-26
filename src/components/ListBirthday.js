@@ -1,6 +1,6 @@
 // src/components/ListBirthday.js
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,7 +15,9 @@ import {
 import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
 
-export default function ListBirthday({ userId }) {
+export default function ListBirthday({ userId, theme }) {
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const [birthdays, setBirthdays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [listError, setListError] = useState("");
@@ -82,7 +84,7 @@ export default function ListBirthday({ userId }) {
   if (isLoading) {
     return (
       <View style={styles.centerState}>
-        <ActivityIndicator color="#F97316" size="large" />
+        <ActivityIndicator color={theme.colors.primary} size="large" />
         <Text style={styles.centerText}>Cargando cumpleaños...</Text>
       </View>
     );
@@ -109,18 +111,22 @@ export default function ListBirthday({ userId }) {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={refreshList}
-          tintColor="#F97316"
+          tintColor={theme.colors.primary}
         />
       }
-      ListEmptyComponent={<EmptyState />}
+      ListEmptyComponent={<EmptyState styles={styles} />}
       renderItem={({ item }) => (
-        <BirthdayCard birthday={item} onDelete={() => confirmDelete(item)} />
+        <BirthdayCard
+          birthday={item}
+          styles={styles}
+          onDelete={() => confirmDelete(item)}
+        />
       )}
     />
   );
 }
 
-function BirthdayCard({ birthday, onDelete }) {
+function BirthdayCard({ birthday, styles, onDelete }) {
   const birthdayInfo = getNextBirthdayInfo(birthday.dateBirth);
   const hasReminder = Boolean(birthday.notificationId);
 
@@ -175,7 +181,7 @@ function BirthdayCard({ birthday, onDelete }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ styles }) {
   return (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
@@ -190,151 +196,157 @@ function EmptyState() {
   );
 }
 
-const styles = StyleSheet.create({
-  listContent: {
-    padding: 22,
-    paddingBottom: 40,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  centerState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  centerText: {
-    color: "#CBD5E1",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "center",
-    marginTop: 12,
-  },
-  errorTitle: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "900",
-    marginBottom: 6,
-  },
-  card: {
-    borderRadius: 24,
-    padding: 18,
-    backgroundColor: "#1E3040",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    marginBottom: 14,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 18,
-  },
-  initialCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F97316",
-    marginRight: 14,
-  },
-  initialText: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "900",
-  },
-  personInfo: {
-    flex: 1,
-  },
-  name: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "900",
-    marginBottom: 4,
-  },
-  date: {
-    color: "#CBD5E1",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  metaBlock: {
-    gap: 10,
-    marginBottom: 14,
-  },
-  badge: {
-    minHeight: 40,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(249,115,22,0.14)",
-    paddingHorizontal: 12,
-  },
-  badgeText: {
-    color: "#FDBA74",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  reminderBadge: {
-    minHeight: 40,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(34,197,94,0.14)",
-    paddingHorizontal: 12,
-  },
-  reminderBadgeDisabled: {
-    backgroundColor: "rgba(148,163,184,0.14)",
-  },
-  reminderBadgeText: {
-    color: "#86EFAC",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  reminderBadgeTextDisabled: {
-    color: "#CBD5E1",
-  },
-  deleteButton: {
-    minHeight: 44,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#334155",
-    paddingHorizontal: 14,
-  },
-  deleteButtonText: {
-    color: "#E2E8F0",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingHorizontal: 12,
-  },
-  emptyIcon: {
-    width: 84,
-    height: 84,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#1E3040",
-    marginBottom: 20,
-  },
-  emptyIconText: {
-    fontSize: 38,
-  },
-  emptyTitle: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "900",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  emptyDescription: {
-    color: "#CBD5E1",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "center",
-  },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    listContent: {
+      padding: 22,
+      paddingBottom: 40,
+      backgroundColor: theme.colors.background,
+    },
+    emptyListContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+    },
+    centerState: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+      backgroundColor: theme.colors.background,
+    },
+    centerText: {
+      color: theme.colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "center",
+      marginTop: 12,
+    },
+    errorTitle: {
+      color: theme.colors.text,
+      fontSize: 22,
+      fontWeight: "900",
+      marginBottom: 6,
+    },
+    card: {
+      borderRadius: 24,
+      padding: 18,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 14,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 18,
+    },
+    initialCircle: {
+      width: 50,
+      height: 50,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.primary,
+      marginRight: 14,
+    },
+    initialText: {
+      color: "#FFFFFF",
+      fontSize: 22,
+      fontWeight: "900",
+    },
+    personInfo: {
+      flex: 1,
+    },
+    name: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "900",
+      marginBottom: 4,
+    },
+    date: {
+      color: theme.colors.textMuted,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    metaBlock: {
+      gap: 10,
+      marginBottom: 14,
+    },
+    badge: {
+      minHeight: 40,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.primarySoft,
+      paddingHorizontal: 12,
+    },
+    badgeText: {
+      color: theme.colors.primary,
+      fontSize: 13,
+      fontWeight: "800",
+    },
+    reminderBadge: {
+      minHeight: 40,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.successSoft,
+      paddingHorizontal: 12,
+    },
+    reminderBadgeDisabled: {
+      backgroundColor: theme.colors.surfaceAlt,
+    },
+    reminderBadgeText: {
+      color: theme.colors.success,
+      fontSize: 13,
+      fontWeight: "800",
+    },
+    reminderBadgeTextDisabled: {
+      color: theme.colors.textMuted,
+    },
+    deleteButton: {
+      minHeight: 44,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.surfaceAlt,
+      paddingHorizontal: 14,
+    },
+    deleteButtonText: {
+      color: theme.colors.text,
+      fontSize: 13,
+      fontWeight: "800",
+    },
+    emptyState: {
+      alignItems: "center",
+      paddingHorizontal: 12,
+    },
+    emptyIcon: {
+      width: 84,
+      height: 84,
+      borderRadius: 30,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 20,
+    },
+    emptyIconText: {
+      fontSize: 38,
+    },
+    emptyTitle: {
+      color: theme.colors.text,
+      fontSize: 22,
+      fontWeight: "900",
+      textAlign: "center",
+      marginBottom: 10,
+    },
+    emptyDescription: {
+      color: theme.colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "center",
+    },
+  });
+}
