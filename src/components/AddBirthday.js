@@ -171,7 +171,8 @@ export default function AddBirthday({
 
       resetForm();
       onClose();
-    } catch {
+    } catch (error) {
+      console.warn("Birthday save failed:", error);
       setGeneralError(
         "No se pudo guardar el cumpleaños. Inténtalo nuevamente.",
       );
