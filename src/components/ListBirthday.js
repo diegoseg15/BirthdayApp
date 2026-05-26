@@ -16,7 +16,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
 
-export default function ListBirthday({ userId, theme, onEditBirthday }) {
+export default function ListBirthday({
+  userId,
+  theme,
+  notificationsEnabled,
+  onEditBirthday,
+}) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [birthdays, setBirthdays] = useState([]);
@@ -121,6 +126,7 @@ export default function ListBirthday({ userId, theme, onEditBirthday }) {
           birthday={item}
           styles={styles}
           theme={theme}
+          notificationsEnabled={notificationsEnabled}
           onEdit={() => onEditBirthday(item)}
           onDelete={() => confirmDelete(item)}
         />
@@ -129,9 +135,16 @@ export default function ListBirthday({ userId, theme, onEditBirthday }) {
   );
 }
 
-function BirthdayCard({ birthday, styles, theme, onEdit, onDelete }) {
+function BirthdayCard({
+  birthday,
+  styles,
+  theme,
+  notificationsEnabled,
+  onEdit,
+  onDelete,
+}) {
   const birthdayInfo = getNextBirthdayInfo(birthday.dateBirth, birthday);
-  const reminder = getReminderPresentation(birthday);
+  const reminder = getReminderPresentation(birthday, notificationsEnabled);
 
   return (
     <View style={styles.card}>
@@ -207,7 +220,15 @@ function EmptyState({ styles, theme }) {
   );
 }
 
-function getReminderPresentation(birthday) {
+function getReminderPresentation(birthday, notificationsEnabled) {
+  if (!notificationsEnabled || birthday.reminderStatus === "disabled") {
+    return {
+      label: "Recordatorio desactivado",
+      styleKey: "reminderBadgeDisabled",
+      textStyleKey: "reminderBadgeTextDisabled",
+    };
+  }
+
   if (birthday.notificationId || birthday.reminderStatus === "scheduled") {
     return {
       label: "Recordatorio activo",
@@ -216,16 +237,8 @@ function getReminderPresentation(birthday) {
     };
   }
 
-  if (birthday.reminderStatus === "disabled") {
-    return {
-      label: "Recordatorio desactivado",
-      styleKey: "reminderBadgeDisabled",
-      textStyleKey: "reminderBadgeTextDisabled",
-    };
-  }
-
   return {
-    label: "Recordatorio no disponible",
+    label: "Recordatorio activado",
     styleKey: "reminderBadgeUnavailable",
     textStyleKey: "reminderBadgeTextUnavailable",
   };
