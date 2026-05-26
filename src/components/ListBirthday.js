@@ -1,6 +1,6 @@
 // src/components/ListBirthday.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,23 +10,20 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-import {
-  listenBirthdays,
-  removeBirthday,
-} from '../services/birthdayService';
-import { formatDate, getNextBirthdayInfo } from '../utils/date';
+import { listenBirthdays, removeBirthday } from "../services/birthdayService";
+import { formatDate, getNextBirthdayInfo } from "../utils/date";
 
 export default function ListBirthday({ userId }) {
   const [birthdays, setBirthdays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [listError, setListError] = useState('');
+  const [listError, setListError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
-    setListError('');
+    setListError("");
 
     const unsubscribe = listenBirthdays(
       userId,
@@ -36,10 +33,10 @@ export default function ListBirthday({ userId }) {
         setRefreshing(false);
       },
       () => {
-        setListError('No se pudieron cargar los cumpleaños.');
+        setListError("No se pudieron cargar los cumpleaños.");
         setIsLoading(false);
         setRefreshing(false);
-      }
+      },
     );
 
     return unsubscribe;
@@ -47,29 +44,29 @@ export default function ListBirthday({ userId }) {
 
   const confirmDelete = (birthday) => {
     Alert.alert(
-      'Eliminar cumpleaños',
+      "Eliminar cumpleaños",
       `¿Quieres eliminar el cumpleaños de ${birthday.name} ${birthday.lastname}?`,
       [
         {
-          text: 'Cancelar',
-          style: 'cancel',
+          text: "Cancelar",
+          style: "cancel",
         },
         {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () => deleteBirthday(birthday.id),
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => deleteBirthday(birthday.id, birthday.notificationId),
         },
-      ]
+      ],
     );
   };
 
-  const deleteBirthday = async (birthdayId) => {
+  const deleteBirthday = async (birthdayId, notificationId) => {
     try {
-      await removeBirthday(userId, birthdayId);
+      await removeBirthday(userId, birthdayId, notificationId);
     } catch {
       Alert.alert(
-        'Error',
-        'No se pudo eliminar el cumpleaños. Inténtalo nuevamente.'
+        "Error",
+        "No se pudo eliminar el cumpleaños. Inténtalo nuevamente.",
       );
     }
   };
@@ -77,7 +74,6 @@ export default function ListBirthday({ userId }) {
   const refreshList = () => {
     setRefreshing(true);
 
-    // La lista usa listener en tiempo real; este gesto solo da feedback visual.
     setTimeout(() => {
       setRefreshing(false);
     }, 600);
@@ -126,13 +122,14 @@ export default function ListBirthday({ userId }) {
 
 function BirthdayCard({ birthday, onDelete }) {
   const birthdayInfo = getNextBirthdayInfo(birthday.dateBirth);
+  const hasReminder = Boolean(birthday.notificationId);
 
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.initialCircle}>
           <Text style={styles.initialText}>
-            {birthday.name?.charAt(0)?.toUpperCase() || '?'}
+            {birthday.name?.charAt(0)?.toUpperCase() || "?"}
           </Text>
         </View>
 
@@ -145,19 +142,35 @@ function BirthdayCard({ birthday, onDelete }) {
         </View>
       </View>
 
-      <View style={styles.cardFooter}>
+      <View style={styles.metaBlock}>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{birthdayInfo.label}</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={onDelete}
-          activeOpacity={0.85}
+        <View
+          style={[
+            styles.reminderBadge,
+            !hasReminder && styles.reminderBadgeDisabled,
+          ]}
         >
-          <Text style={styles.deleteButtonText}>Eliminar</Text>
-        </TouchableOpacity>
+          <Text
+            style={[
+              styles.reminderBadgeText,
+              !hasReminder && styles.reminderBadgeTextDisabled,
+            ]}
+          >
+            {hasReminder ? "Recordatorio activo" : "Sin recordatorio"}
+          </Text>
+        </View>
       </View>
+
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={onDelete}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.deleteButtonText}>Eliminar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -184,127 +197,144 @@ const styles = StyleSheet.create({
   },
   emptyListContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   centerState: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   centerText: {
-    color: '#CBD5E1',
+    color: "#CBD5E1",
     fontSize: 15,
     lineHeight: 22,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 12,
   },
   errorTitle: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: "900",
     marginBottom: 6,
   },
   card: {
     borderRadius: 24,
     padding: 18,
-    backgroundColor: '#1E3040',
+    backgroundColor: "#1E3040",
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: "rgba(255,255,255,0.08)",
     marginBottom: 14,
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 18,
   },
   initialCircle: {
     width: 50,
     height: 50,
     borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F97316',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F97316",
     marginRight: 14,
   },
   initialText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   personInfo: {
     flex: 1,
   },
   name: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: "900",
     marginBottom: 4,
   },
   date: {
-    color: '#CBD5E1',
+    color: "#CBD5E1",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  metaBlock: {
     gap: 10,
+    marginBottom: 14,
   },
   badge: {
-    flex: 1,
     minHeight: 40,
     borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(249,115,22,0.14)',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(249,115,22,0.14)",
     paddingHorizontal: 12,
   },
   badgeText: {
-    color: '#FDBA74',
+    color: "#FDBA74",
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
   },
-  deleteButton: {
+  reminderBadge: {
     minHeight: 40,
     borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#334155',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(34,197,94,0.14)",
+    paddingHorizontal: 12,
+  },
+  reminderBadgeDisabled: {
+    backgroundColor: "rgba(148,163,184,0.14)",
+  },
+  reminderBadgeText: {
+    color: "#86EFAC",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  reminderBadgeTextDisabled: {
+    color: "#CBD5E1",
+  },
+  deleteButton: {
+    minHeight: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#334155",
     paddingHorizontal: 14,
   },
   deleteButtonText: {
-    color: '#E2E8F0',
+    color: "#E2E8F0",
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   emptyState: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 12,
   },
   emptyIcon: {
     width: 84,
     height: 84,
     borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1E3040',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1E3040",
     marginBottom: 20,
   },
   emptyIconText: {
     fontSize: 38,
   },
   emptyTitle: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 22,
-    fontWeight: '900',
-    textAlign: 'center',
+    fontWeight: "900",
+    textAlign: "center",
     marginBottom: 10,
   },
   emptyDescription: {
-    color: '#CBD5E1',
+    color: "#CBD5E1",
     fontSize: 15,
     lineHeight: 22,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
