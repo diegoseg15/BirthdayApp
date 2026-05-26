@@ -1,13 +1,17 @@
 {
   "expo": {
-    "name": "BirthdayApp",
-    "slug": "birthday-app",
+    "name": "Rimind",
+    "slug": "rimind",
     "version": "2.0.0",
     "orientation": "portrait",
-    "scheme": "birthdayapp",
-    "icon": "./assets/icon.png",
+    "scheme": "rimind",
+    "icon": "./assets/icons/icon-light.png",
     "userInterfaceStyle": "automatic",
-    "assetBundlePatterns": ["**/*"],
+    "backgroundColor": "#F8FAFC",
+    "primaryColor": "#F97316",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
       [
         "expo-notifications",
@@ -15,23 +19,33 @@
           "color": "#F97316",
           "defaultChannel": "birthday-reminders"
         }
-      ]
+      ],
+      "expo-localization",
+      "expo-system-ui"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.diegoseg.birthdayapp"
+      "bundleIdentifier": "com.diegoseg.rimind",
+      "userInterfaceStyle": "automatic",
+      "icon": {
+        "light": "./assets/icons/ios-icon-light.png",
+        "dark": "./assets/icons/ios-icon-dark.png",
+        "tinted": "./assets/icons/ios-icon-tinted.png"
+      }
     },
     "android": {
-      "package": "com.diegoseg.birthdayapp",
+      "package": "com.diegoseg.rimind",
+      "versionCode": 1,
+      "userInterfaceStyle": "automatic",
+      "backgroundColor": "#15212B",
       "adaptiveIcon": {
-        "backgroundColor": "#15212B",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#202E3C",
+        "foregroundImage": "./assets/icons/android-icon-foreground.png",
+        "monochromeImage": "./assets/icons/android-icon-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/icons/favicon.png",
       "bundler": "metro"
     }
   }
