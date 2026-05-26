@@ -23,6 +23,12 @@ import {
 
 const FALLBACK_BIRTH_YEAR = 2000;
 
+export const REMINDER_STATUS = {
+  SCHEDULED: "scheduled",
+  DISABLED: "disabled",
+  UNAVAILABLE: "unavailable",
+};
+
 function getBirthdaysCollection(userId) {
   return collection(db, "users", userId, "birthdays");
 }
@@ -45,6 +51,13 @@ function normalizeBirthdayDate(date, hasBirthYear) {
   );
 }
 
+function getReminderStatus(notificationId, notificationsEnabled) {
+  if (!notificationsEnabled) return REMINDER_STATUS.DISABLED;
+  if (notificationId) return REMINDER_STATUS.SCHEDULED;
+
+  return REMINDER_STATUS.UNAVAILABLE;
+}
+
 export function listenBirthdays(userId, callback, onError) {
   const birthdaysQuery = query(
     getBirthdaysCollection(userId),
@@ -54,9 +67,9 @@ export function listenBirthdays(userId, callback, onError) {
   return onSnapshot(
     birthdaysQuery,
     (snapshot) => {
-      const birthdays = snapshot.docs.map((document) => ({
-        id: document.id,
-        ...document.data(),
+      const birthdays = snapshot.docs.map((documentSnapshot) => ({
+        id: documentSnapshot.id,
+        ...documentSnapshot.data(),
       }));
 
       callback(birthdays);
@@ -77,7 +90,7 @@ export async function migrateLegacyBirthdays(userId) {
 
   const currentSnapshot = await getDocs(getBirthdaysCollection(userId));
   const currentBirthdayIds = new Set(
-    currentSnapshot.docs.map((document) => document.id),
+    currentSnapshot.docs.map((documentSnapshot) => documentSnapshot.id),
   );
 
   const batch = writeBatch(db);
@@ -115,8 +128,12 @@ export async function migrateLegacyBirthdays(userId) {
         dateBirth: legacyData.dateBirth,
         birthDay: date ? date.getDate() : null,
         birthMonth: date ? date.getMonth() + 1 : null,
+        birthYear: date ? date.getFullYear() : null,
         hasBirthYear: true,
         notificationId: legacyData.notificationId || null,
+        reminderStatus: legacyData.notificationId
+          ? REMINDER_STATUS.SCHEDULED
+          : REMINDER_STATUS.UNAVAILABLE,
         migratedFromLegacy: true,
         legacyId: legacyDocument.id,
         createdAt: legacyData.createdAt || serverTimestamp(),
@@ -160,6 +177,9 @@ export async function createBirthday(
     birthYear: hasBirthYear ? normalizedDate.getFullYear() : null,
     hasBirthYear,
     notificationId: null,
+    reminderStatus: options.notificationsEnabled
+      ? REMINDER_STATUS.UNAVAILABLE
+      : REMINDER_STATUS.DISABLED,
     migratedFromLegacy: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -176,14 +196,64 @@ export async function createBirthday(
     dateBirth: normalizedDate,
   });
 
-  if (notificationId) {
-    await updateDoc(birthdayRef, {
+  await updateDoc(birthdayRef, {
+    notificationId: notificationId || null,
+    reminderStatus: getReminderStatus(
       notificationId,
-      updatedAt: serverTimestamp(),
+      options.notificationsEnabled,
+    ),
+    updatedAt: serverTimestamp(),
+  });
+
+  return birthdayRef;
+}
+
+export async function updateBirthday(
+  userId,
+  birthdayId,
+  birthdayData,
+  options = { notificationsEnabled: true, currentNotificationId: null },
+) {
+  const cleanName = birthdayData.name.trim();
+  const cleanLastname = birthdayData.lastname.trim();
+  const hasBirthYear = Boolean(birthdayData.hasBirthYear);
+  const normalizedDate = normalizeBirthdayDate(
+    birthdayData.dateBirth,
+    hasBirthYear,
+  );
+
+  if (options.currentNotificationId) {
+    await cancelBirthdayReminder(options.currentNotificationId);
+  }
+
+  let notificationId = null;
+
+  if (options.notificationsEnabled) {
+    notificationId = await scheduleBirthdayReminder({
+      birthdayId,
+      name: cleanName,
+      lastname: cleanLastname,
+      dateBirth: normalizedDate,
     });
   }
 
-  return birthdayRef;
+  const birthdayRef = doc(db, "users", userId, "birthdays", birthdayId);
+
+  return updateDoc(birthdayRef, {
+    name: cleanName,
+    lastname: cleanLastname,
+    dateBirth: Timestamp.fromDate(normalizedDate),
+    birthDay: normalizedDate.getDate(),
+    birthMonth: normalizedDate.getMonth() + 1,
+    birthYear: hasBirthYear ? normalizedDate.getFullYear() : null,
+    hasBirthYear,
+    notificationId: notificationId || null,
+    reminderStatus: getReminderStatus(
+      notificationId,
+      options.notificationsEnabled,
+    ),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function enableBirthdayRemindersForUser(userId) {
@@ -206,10 +276,11 @@ export async function enableBirthdayRemindersForUser(userId) {
       dateBirth: birthday.dateBirth,
     });
 
-    if (!notificationId) continue;
-
     batch.update(birthdayDocument.ref, {
-      notificationId,
+      notificationId: notificationId || null,
+      reminderStatus: notificationId
+        ? REMINDER_STATUS.SCHEDULED
+        : REMINDER_STATUS.UNAVAILABLE,
       updatedAt: serverTimestamp(),
     });
 
@@ -231,12 +302,13 @@ export async function disableBirthdayRemindersForUser(userId) {
   for (const birthdayDocument of snapshot.docs) {
     const birthday = birthdayDocument.data();
 
-    if (!birthday.notificationId) continue;
-
-    await cancelBirthdayReminder(birthday.notificationId);
+    if (birthday.notificationId) {
+      await cancelBirthdayReminder(birthday.notificationId);
+    }
 
     batch.update(birthdayDocument.ref, {
       notificationId: null,
+      reminderStatus: REMINDER_STATUS.DISABLED,
       updatedAt: serverTimestamp(),
     });
 
