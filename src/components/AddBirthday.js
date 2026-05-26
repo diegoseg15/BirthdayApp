@@ -1,6 +1,6 @@
 // src/components/AddBirthday.js
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -13,7 +13,8 @@ import {
   View,
 } from "react-native";
 
-import { createBirthday } from "../services/birthdayService";
+import { createBirthday, updateBirthday } from "../services/birthdayService";
+import { getDateFromFirestoreValue } from "../utils/date";
 
 const FALLBACK_BIRTH_YEAR = 2000;
 
@@ -31,6 +32,7 @@ export default function AddBirthday({
   userId,
   theme,
   notificationsEnabled,
+  birthdayToEdit,
   onClose,
 }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -39,6 +41,38 @@ export default function AddBirthday({
   const [formError, setFormError] = useState({});
   const [generalError, setGeneralError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  const isEditing = Boolean(birthdayToEdit?.id);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    if (!birthdayToEdit) {
+      setFormData(DEFAULT_FORM);
+      setFormError({});
+      setGeneralError("");
+      return;
+    }
+
+    const date = getDateFromFirestoreValue(birthdayToEdit.dateBirth);
+    const hasBirthYear = birthdayToEdit.hasBirthYear ?? true;
+
+    setFormData({
+      name: birthdayToEdit.name || "",
+      lastname: birthdayToEdit.lastname || "",
+      birthDay: String(birthdayToEdit.birthDay || date?.getDate() || ""),
+      birthMonth: String(
+        birthdayToEdit.birthMonth || (date ? date.getMonth() + 1 : ""),
+      ),
+      birthYear: hasBirthYear
+        ? String(birthdayToEdit.birthYear || date?.getFullYear() || "")
+        : "",
+      hasBirthYear,
+    });
+
+    setFormError({});
+    setGeneralError("");
+  }, [birthdayToEdit, visible]);
 
   const updateForm = (field, value) => {
     const numericFields = ["birthDay", "birthMonth", "birthYear"];
@@ -117,18 +151,23 @@ export default function AddBirthday({
       setIsSaving(true);
       setGeneralError("");
 
-      await createBirthday(
-        userId,
-        {
-          name: formData.name,
-          lastname: formData.lastname,
-          dateBirth,
-          hasBirthYear: formData.hasBirthYear,
-        },
-        {
+      const payload = {
+        name: formData.name,
+        lastname: formData.lastname,
+        dateBirth,
+        hasBirthYear: formData.hasBirthYear,
+      };
+
+      if (isEditing) {
+        await updateBirthday(userId, birthdayToEdit.id, payload, {
           notificationsEnabled,
-        },
-      );
+          currentNotificationId: birthdayToEdit.notificationId,
+        });
+      } else {
+        await createBirthday(userId, payload, {
+          notificationsEnabled,
+        });
+      }
 
       resetForm();
       onClose();
@@ -153,7 +192,9 @@ export default function AddBirthday({
         <Pressable style={styles.backdrop} onPress={closeModal} />
 
         <View style={styles.modalCard}>
-          <Text style={styles.title}>Nuevo cumpleaños</Text>
+          <Text style={styles.title}>
+            {isEditing ? "Editar cumpleaños" : "Nuevo cumpleaños"}
+          </Text>
           <Text style={styles.subtitle}>
             Guarda día y mes. El año es opcional.
           </Text>
@@ -276,7 +317,9 @@ export default function AddBirthday({
               {isSaving ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.saveButtonText}>Guardar</Text>
+                <Text style={styles.saveButtonText}>
+                  {isEditing ? "Actualizar" : "Guardar"}
+                </Text>
               )}
             </TouchableOpacity>
           </View>
