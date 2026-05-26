@@ -1,24 +1,24 @@
 // src/components/Birthday.js
 
-import React, { useEffect, useMemo, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { logout } from "../services/authService";
+import { logout } from '../services/authService';
 import {
   disableBirthdayRemindersForUser,
   enableBirthdayRemindersForUser,
   migrateLegacyBirthdays,
-} from "../services/birthdayService";
-import ActionBar from "./ActionBar";
-import AddBirthday from "./AddBirthday";
-import BottomNavigation from "./BottomNavigation";
-import ListBirthday from "./ListBirthday";
-import Settings from "./Settings";
+} from '../services/birthdayService';
+import ActionBar from './ActionBar';
+import AddBirthday from './AddBirthday';
+import BottomNavigation from './BottomNavigation';
+import ListBirthday from './ListBirthday';
+import Settings from './Settings';
 
 const SECTIONS = {
-  BIRTHDAYS: "birthdays",
-  SETTINGS: "settings",
+  BIRTHDAYS: 'birthdays',
+  SETTINGS: 'settings',
 };
 
 export default function Birthday({
@@ -34,15 +34,15 @@ export default function Birthday({
   const [activeSection, setActiveSection] = useState(SECTIONS.BIRTHDAYS);
   const [isAddBirthdayVisible, setIsAddBirthdayVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [migrationMessage, setMigrationMessage] = useState("");
-  const [migrationError, setMigrationError] = useState("");
+  const [migrationMessage, setMigrationMessage] = useState('');
+  const [migrationError, setMigrationError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
 
     async function runLegacyMigration() {
       try {
-        setMigrationError("");
+        setMigrationError('');
 
         const result = await migrateLegacyBirthdays(user.uid);
 
@@ -50,19 +50,19 @@ export default function Birthday({
 
         if (result.migrated > 0) {
           setMigrationMessage(
-            `Se recuperaron ${result.migrated} cumpleaños anteriores.`,
+            `Se recuperaron ${result.migrated} cumpleaños anteriores.`
           );
 
           setTimeout(() => {
             if (isMounted) {
-              setMigrationMessage("");
+              setMigrationMessage('');
             }
           }, 4500);
         }
       } catch {
         if (isMounted) {
           setMigrationError(
-            "No se pudieron recuperar los cumpleaños anteriores. Revisa las reglas de Firestore.",
+            'No se pudieron recuperar los cumpleaños anteriores. Revisa las reglas de Firestore.'
           );
         }
       }
@@ -104,14 +104,14 @@ export default function Birthday({
       await disableBirthdayRemindersForUser(user.uid);
     } catch {
       Alert.alert(
-        "Aviso",
-        "La preferencia se guardó, pero no se pudieron actualizar todos los recordatorios existentes.",
+        'Aviso',
+        'La preferencia se guardó, pero no se pudieron actualizar todos los recordatorios existentes.'
       );
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "right", "left"]}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'right', 'left']}>
       <View style={styles.content}>
         <ActionBar theme={theme} userEmail={user.email} />
 
@@ -184,8 +184,8 @@ function createStyles(theme) {
     successBannerText: {
       color: theme.colors.success,
       fontSize: 13,
-      fontWeight: "800",
-      textAlign: "center",
+      fontWeight: '800',
+      textAlign: 'center',
     },
     errorBanner: {
       marginHorizontal: 22,
@@ -200,8 +200,8 @@ function createStyles(theme) {
     errorBannerText: {
       color: theme.colors.danger,
       fontSize: 13,
-      fontWeight: "800",
-      textAlign: "center",
+      fontWeight: '800',
+      textAlign: 'center',
     },
   });
 }
