@@ -5,7 +5,7 @@ export function formatDate(dateValue) {
 
   if (!date) return "Fecha no disponible";
 
-  return new Intl.DateTimeFormat("es-EC", {
+  return new Intl.DateTimeFormat(undefined, {
     day: "2-digit",
     month: "long",
     year: "numeric",
