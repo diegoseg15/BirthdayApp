@@ -10,7 +10,7 @@ const SECTIONS = {
   SETTINGS: "settings",
 };
 
-export default function BottomNavigation({
+function BottomNavigation({
   theme,
   activeSection,
   onChangeSection,
@@ -93,6 +93,8 @@ export default function BottomNavigation({
     </View>
   );
 }
+
+export default BottomNavigation;
 
 function createStyles(theme, insets) {
   return StyleSheet.create({
