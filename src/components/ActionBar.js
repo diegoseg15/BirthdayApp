@@ -1,21 +1,18 @@
 // src/components/ActionBar.js
 
 import React, { useMemo } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-const SECTIONS = {
-  BIRTHDAYS: "birthdays",
-  SETTINGS: "settings",
-};
-
-export default function ActionBar({
-  theme,
-  userEmail,
-  activeSection,
-  onChangeSection,
-  onOpenAddBirthday,
-}) {
+export default function ActionBar({ theme, userEmail, activeSection }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const sectionTitle =
+    activeSection === "settings" ? "Configuración" : "Cumpleaños";
+
+  const sectionDescription =
+    activeSection === "settings"
+      ? "Ajustes de la app, cuenta y preferencias."
+      : "Organiza fechas importantes y próximos cumpleaños.";
 
   return (
     <View style={styles.container}>
@@ -25,57 +22,16 @@ export default function ActionBar({
         </View>
 
         <View style={styles.profileTextBlock}>
-          <Text style={styles.title}>BirthdayApp</Text>
+          <Text style={styles.appTitle}>BirthdayApp</Text>
           <Text style={styles.email} numberOfLines={1}>
             {userEmail}
           </Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={onOpenAddBirthday}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
       </View>
 
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeSection === SECTIONS.BIRTHDAYS && styles.tabActive,
-          ]}
-          onPress={() => onChangeSection(SECTIONS.BIRTHDAYS)}
-          activeOpacity={0.85}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeSection === SECTIONS.BIRTHDAYS && styles.tabTextActive,
-            ]}
-          >
-            Cumpleaños
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeSection === SECTIONS.SETTINGS && styles.tabActive,
-          ]}
-          onPress={() => onChangeSection(SECTIONS.SETTINGS)}
-          activeOpacity={0.85}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeSection === SECTIONS.SETTINGS && styles.tabTextActive,
-            ]}
-          >
-            Configuración
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>{sectionTitle}</Text>
+        <Text style={styles.sectionDescription}>{sectionDescription}</Text>
       </View>
     </View>
   );
@@ -86,7 +42,7 @@ function createStyles(theme) {
     container: {
       paddingHorizontal: 22,
       paddingTop: 14,
-      paddingBottom: 16,
+      paddingBottom: 18,
       backgroundColor: theme.colors.background,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
@@ -113,7 +69,7 @@ function createStyles(theme) {
     profileTextBlock: {
       flex: 1,
     },
-    title: {
+    appTitle: {
       color: theme.colors.text,
       fontSize: 22,
       fontWeight: "900",
@@ -124,45 +80,23 @@ function createStyles(theme) {
       fontSize: 13,
       fontWeight: "600",
     },
-    addButton: {
-      width: 46,
-      height: 46,
-      borderRadius: 16,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: theme.colors.primary,
-    },
-    addButtonText: {
-      color: "#FFFFFF",
-      fontSize: 28,
-      lineHeight: 30,
-      fontWeight: "900",
-    },
-    tabs: {
-      flexDirection: "row",
-      padding: 4,
-      borderRadius: 18,
-      backgroundColor: theme.colors.surface,
+    sectionBlock: {
+      borderRadius: 22,
+      padding: 18,
+      backgroundColor: theme.colors.card,
       borderWidth: 1,
       borderColor: theme.colors.border,
     },
-    tab: {
-      flex: 1,
-      height: 42,
-      borderRadius: 14,
-      alignItems: "center",
-      justifyContent: "center",
+    sectionTitle: {
+      color: theme.colors.text,
+      fontSize: 24,
+      fontWeight: "900",
+      marginBottom: 6,
     },
-    tabActive: {
-      backgroundColor: theme.colors.primary,
-    },
-    tabText: {
+    sectionDescription: {
       color: theme.colors.textMuted,
       fontSize: 14,
-      fontWeight: "800",
-    },
-    tabTextActive: {
-      color: "#FFFFFF",
+      lineHeight: 20,
     },
   });
 }
