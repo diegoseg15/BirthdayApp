@@ -6,13 +6,7 @@ import { StyleSheet, Text, View } from "react-native";
 export default function ActionBar({ theme, userEmail, activeSection }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const sectionTitle =
-    activeSection === "settings" ? "Configuración" : "Cumpleaños";
-
-  const sectionDescription =
-    activeSection === "settings"
-      ? "Ajustes de la app, cuenta y preferencias."
-      : "Organiza fechas importantes y próximos cumpleaños.";
+  const isSettingsSection = activeSection === "settings";
 
   return (
     <View style={styles.container}>
@@ -29,10 +23,14 @@ export default function ActionBar({ theme, userEmail, activeSection }) {
         </View>
       </View>
 
-      <View style={styles.sectionBlock}>
-        <Text style={styles.sectionTitle}>{sectionTitle}</Text>
-        <Text style={styles.sectionDescription}>{sectionDescription}</Text>
-      </View>
+      {isSettingsSection ? (
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionTitle}>Configuración</Text>
+          <Text style={styles.sectionDescription}>
+            Ajustes de la app, cuenta y preferencias.
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -42,7 +40,7 @@ function createStyles(theme) {
     container: {
       paddingHorizontal: 22,
       paddingTop: 14,
-      paddingBottom: 18,
+      paddingBottom: 14,
       backgroundColor: theme.colors.background,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
@@ -50,7 +48,6 @@ function createStyles(theme) {
     profileBlock: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 18,
     },
     avatar: {
       width: 48,
@@ -81,6 +78,7 @@ function createStyles(theme) {
       fontWeight: "600",
     },
     sectionBlock: {
+      marginTop: 18,
       borderRadius: 22,
       padding: 18,
       backgroundColor: theme.colors.card,
