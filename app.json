@@ -2,12 +2,21 @@
   "expo": {
     "name": "BirthdayApp",
     "slug": "birthday-app",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "orientation": "portrait",
     "scheme": "birthdayapp",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#F97316",
+          "defaultChannel": "birthday-reminders"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.diegoseg.birthdayapp"
