@@ -12,6 +12,7 @@ import {
 } from "../services/birthdayService";
 import ActionBar from "./ActionBar";
 import AddBirthday from "./AddBirthday";
+import BottomNavigation from "./BottomNavigation";
 import ListBirthday from "./ListBirthday";
 import Settings from "./Settings";
 
@@ -111,40 +112,40 @@ export default function Birthday({
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "right", "left"]}>
-      <ActionBar
-        theme={theme}
-        userEmail={user.email}
-        activeSection={activeSection}
-        onChangeSection={setActiveSection}
-        onOpenAddBirthday={openAddBirthday}
-      />
-
-      {migrationMessage ? (
-        <View style={styles.successBanner}>
-          <Text style={styles.successBannerText}>{migrationMessage}</Text>
-        </View>
-      ) : null}
-
-      {migrationError ? (
-        <View style={styles.errorBanner}>
-          <Text style={styles.errorBannerText}>{migrationError}</Text>
-        </View>
-      ) : null}
-
-      {activeSection === SECTIONS.BIRTHDAYS ? (
-        <ListBirthday userId={user.uid} theme={theme} />
-      ) : (
-        <Settings
-          user={user}
+      <View style={styles.content}>
+        <ActionBar
           theme={theme}
-          appSettings={appSettings}
-          deviceLanguage={deviceLanguage}
-          onChangeThemeMode={onChangeThemeMode}
-          onChangeNotificationsEnabled={handleChangeNotifications}
-          onLogout={handleLogout}
-          isLoggingOut={isLoggingOut}
+          userEmail={user.email}
+          activeSection={activeSection}
         />
-      )}
+
+        {migrationMessage ? (
+          <View style={styles.successBanner}>
+            <Text style={styles.successBannerText}>{migrationMessage}</Text>
+          </View>
+        ) : null}
+
+        {migrationError ? (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorBannerText}>{migrationError}</Text>
+          </View>
+        ) : null}
+
+        {activeSection === SECTIONS.BIRTHDAYS ? (
+          <ListBirthday userId={user.uid} theme={theme} />
+        ) : (
+          <Settings
+            user={user}
+            theme={theme}
+            appSettings={appSettings}
+            deviceLanguage={deviceLanguage}
+            onChangeThemeMode={onChangeThemeMode}
+            onChangeNotificationsEnabled={handleChangeNotifications}
+            onLogout={handleLogout}
+            isLoggingOut={isLoggingOut}
+          />
+        )}
+      </View>
 
       <AddBirthday
         visible={isAddBirthdayVisible}
@@ -153,6 +154,13 @@ export default function Birthday({
         notificationsEnabled={appSettings.notificationsEnabled}
         onClose={closeAddBirthday}
       />
+
+      <BottomNavigation
+        theme={theme}
+        activeSection={activeSection}
+        onChangeSection={setActiveSection}
+        onOpenAddBirthday={openAddBirthday}
+      />
     </SafeAreaView>
   );
 }
@@ -160,6 +168,10 @@ export default function Birthday({
 function createStyles(theme) {
   return StyleSheet.create({
     safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    content: {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
