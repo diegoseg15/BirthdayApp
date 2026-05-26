@@ -31,9 +31,9 @@ export default function Birthday({
 }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [birthdayToEdit, setBirthdayToEdit] = useState(null);
   const [activeSection, setActiveSection] = useState(SECTIONS.BIRTHDAYS);
   const [isAddBirthdayVisible, setIsAddBirthdayVisible] = useState(false);
+  const [birthdayToEdit, setBirthdayToEdit] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [migrationMessage, setMigrationMessage] = useState("");
   const [migrationError, setMigrationError] = useState("");
@@ -77,10 +77,17 @@ export default function Birthday({
   }, [user.uid]);
 
   const openAddBirthday = () => {
+    setBirthdayToEdit(null);
+    setIsAddBirthdayVisible(true);
+  };
+
+  const openEditBirthday = (birthday) => {
+    setBirthdayToEdit(birthday);
     setIsAddBirthdayVisible(true);
   };
 
   const closeAddBirthday = () => {
+    setBirthdayToEdit(null);
     setIsAddBirthdayVisible(false);
   };
 
@@ -91,21 +98,6 @@ export default function Birthday({
     } finally {
       setIsLoggingOut(false);
     }
-  };
-
-  const openEditBirthday = (birthday) => {
-    setBirthdayToEdit(birthday);
-    setIsAddBirthdayVisible(true);
-  };
-
-  const openAddBirthday = () => {
-    setBirthdayToEdit(null);
-    setIsAddBirthdayVisible(true);
-  };
-
-  const closeAddBirthday = () => {
-    setBirthdayToEdit(null);
-    setIsAddBirthdayVisible(false);
   };
 
   const handleChangeNotifications = async (enabled) => {
