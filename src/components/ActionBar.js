@@ -3,18 +3,18 @@
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import BrandLogo from "./BrandLogo";
+
 export default function ActionBar({ theme, userEmail }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.container}>
       <View style={styles.profileBlock}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>B</Text>
-        </View>
+        <BrandLogo theme={theme} size={50} rounded={18} />
 
         <View style={styles.profileTextBlock}>
-          <Text style={styles.appTitle}>BirthdayApp</Text>
+          <Text style={styles.appTitle}>Rimind</Text>
           <Text style={styles.email} numberOfLines={1}>
             {userEmail}
           </Text>
@@ -38,28 +38,16 @@ function createStyles(theme) {
       flexDirection: "row",
       alignItems: "center",
     },
-    avatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 18,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: theme.colors.primary,
-      marginRight: 14,
-    },
-    avatarText: {
-      color: "#FFFFFF",
-      fontSize: 24,
-      fontWeight: "900",
-    },
     profileTextBlock: {
       flex: 1,
+      marginLeft: 14,
     },
     appTitle: {
       color: theme.colors.text,
       fontSize: 22,
       fontWeight: "900",
       marginBottom: 2,
+      letterSpacing: -0.3,
     },
     email: {
       color: theme.colors.textMuted,
