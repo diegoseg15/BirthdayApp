@@ -49,7 +49,6 @@ export async function configureNotifications() {
       {
         name: "Recordatorios de cumpleaños",
         importance: Notifications.AndroidImportance.HIGH,
-        sound: "default",
         vibrationPattern: [0, 250, 250, 250],
         lightColor: "#F97316",
       },
@@ -107,7 +106,6 @@ export async function scheduleBirthdayReminder({
     content: {
       title: "Recordatorio de cumpleaños",
       body: `Hoy es el cumpleaños de ${name} ${lastname}.`,
-      sound: "default",
       color: "#F97316",
       data: {
         type: "birthday-reminder",
