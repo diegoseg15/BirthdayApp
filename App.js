@@ -1,18 +1,16 @@
 // App.js
 
-import './src/utils/base64Polyfill';
+import "./src/utils/base64Polyfill";
 
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, StatusBar, StyleSheet } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-import Auth from './src/components/Auth';
-import Birthday from './src/components/Birthday';
-import { listenAuthState } from './src/services/authService';
-import { configureNotifications } from './src/services/notificationService';
+import Auth from "./src/components/Auth";
+import Birthday from "./src/components/Birthday";
+import { listenAuthState } from "./src/services/authService";
+import { configureNotifications } from "./src/services/notificationService";
+import { useAppSettings } from "./src/hooks/useAppSettings";
 
 export default function App() {
   return (
@@ -24,6 +22,15 @@ export default function App() {
 
 function AppContent() {
   const [user, setUser] = useState(undefined);
+
+  const {
+    settings,
+    isSettingsReady,
+    theme,
+    deviceLanguage,
+    updateThemeMode,
+    updateNotificationsEnabled,
+  } = useAppSettings();
 
   useEffect(() => {
     configureNotifications();
@@ -37,22 +44,43 @@ function AppContent() {
     return unsubscribe;
   }, []);
 
-  if (user === undefined) {
+  if (user === undefined || !isSettingsReady) {
     return (
       <SafeAreaView
-        style={styles.loadingContainer}
-        edges={['top', 'right', 'bottom', 'left']}
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+        edges={["top", "right", "bottom", "left"]}
       >
-        <StatusBar barStyle="light-content" backgroundColor="#15212B" />
-        <ActivityIndicator color="#F97316" size="large" />
+        <StatusBar
+          barStyle={theme.isDark ? "light-content" : "dark-content"}
+          backgroundColor={theme.colors.background}
+        />
+        <ActivityIndicator color={theme.colors.primary} size="large" />
       </SafeAreaView>
     );
   }
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#15212B" />
-      {user ? <Birthday user={user} /> : <Auth />}
+      <StatusBar
+        barStyle={theme.isDark ? "light-content" : "dark-content"}
+        backgroundColor={theme.colors.background}
+      />
+
+      {user ? (
+        <Birthday
+          user={user}
+          theme={theme}
+          appSettings={settings}
+          deviceLanguage={deviceLanguage}
+          onChangeThemeMode={updateThemeMode}
+          onChangeNotificationsEnabled={updateNotificationsEnabled}
+        />
+      ) : (
+        <Auth theme={theme} />
+      )}
     </>
   );
 }
@@ -60,8 +88,7 @@ function AppContent() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#15212B',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
