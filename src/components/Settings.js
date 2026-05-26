@@ -194,7 +194,7 @@ function createStyles(theme) {
     },
     content: {
       padding: theme.spacing.xl,
-      paddingBottom: 42,
+      paddingBottom: 132,
     },
     headerCard: {
       borderRadius: theme.radius.xl,
