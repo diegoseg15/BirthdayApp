@@ -113,11 +113,7 @@ export default function Birthday({
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "right", "left"]}>
       <View style={styles.content}>
-        <ActionBar
-          theme={theme}
-          userEmail={user.email}
-          activeSection={activeSection}
-        />
+        <ActionBar theme={theme} userEmail={user.email} />
 
         {migrationMessage ? (
           <View style={styles.successBanner}>
