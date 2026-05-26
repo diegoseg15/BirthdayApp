@@ -12,6 +12,7 @@ import {
 import Auth from './src/components/Auth';
 import Birthday from './src/components/Birthday';
 import { listenAuthState } from './src/services/authService';
+import { configureNotifications } from './src/services/notificationService';
 
 export default function App() {
   return (
@@ -23,6 +24,10 @@ export default function App() {
 
 function AppContent() {
   const [user, setUser] = useState(undefined);
+
+  useEffect(() => {
+    configureNotifications();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = listenAuthState((currentUser) => {
