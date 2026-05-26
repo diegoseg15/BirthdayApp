@@ -58,6 +58,25 @@ function getReminderStatus(notificationId, notificationsEnabled) {
   return REMINDER_STATUS.UNAVAILABLE;
 }
 
+async function safeScheduleBirthdayReminder({
+  birthdayId,
+  name,
+  lastname,
+  dateBirth,
+}) {
+  try {
+    return await scheduleBirthdayReminder({
+      birthdayId,
+      name,
+      lastname,
+      dateBirth,
+    });
+  } catch (error) {
+    console.warn("Birthday reminder could not be scheduled:", error);
+    return null;
+  }
+}
+
 export function listenBirthdays(userId, callback, onError) {
   const birthdaysQuery = query(
     getBirthdaysCollection(userId),
@@ -189,7 +208,7 @@ export async function createBirthday(
     return birthdayRef;
   }
 
-  const notificationId = await scheduleBirthdayReminder({
+  const notificationId = await safeScheduleBirthdayReminder({
     birthdayId: birthdayRef.id,
     name: cleanName,
     lastname: cleanLastname,
@@ -229,7 +248,7 @@ export async function updateBirthday(
   let notificationId = null;
 
   if (options.notificationsEnabled) {
-    notificationId = await scheduleBirthdayReminder({
+    notificationId = await safeScheduleBirthdayReminder({
       birthdayId,
       name: cleanName,
       lastname: cleanLastname,
@@ -269,7 +288,7 @@ export async function enableBirthdayRemindersForUser(userId) {
 
     if (birthday.notificationId) continue;
 
-    const notificationId = await scheduleBirthdayReminder({
+    const notificationId = await safeScheduleBirthdayReminder({
       birthdayId: birthday.id,
       name: birthday.name,
       lastname: birthday.lastname,
