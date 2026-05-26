@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
@@ -114,7 +115,7 @@ export default function ListBirthday({ userId, theme }) {
           tintColor={theme.colors.primary}
         />
       }
-      ListEmptyComponent={<EmptyState styles={styles} />}
+      ListEmptyComponent={<EmptyState styles={styles} theme={theme} />}
       renderItem={({ item }) => (
         <BirthdayCard
           birthday={item}
@@ -181,16 +182,16 @@ function BirthdayCard({ birthday, styles, onDelete }) {
   );
 }
 
-function EmptyState({ styles }) {
+function EmptyState({ styles, theme }) {
   return (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
-        <Text style={styles.emptyIconText}>🎂</Text>
+        <Ionicons name="gift-outline" size={42} color={theme.colors.primary} />
       </View>
 
       <Text style={styles.emptyTitle}>No hay cumpleaños guardados</Text>
       <Text style={styles.emptyDescription}>
-        Agrega tu primer cumpleaños usando el botón superior.
+        Agrega tu primer cumpleaños usando el botón central.
       </Text>
     </View>
   );
@@ -331,9 +332,6 @@ function createStyles(theme) {
       borderWidth: 1,
       borderColor: theme.colors.border,
       marginBottom: 20,
-    },
-    emptyIconText: {
-      fontSize: 38,
     },
     emptyTitle: {
       color: theme.colors.text,
