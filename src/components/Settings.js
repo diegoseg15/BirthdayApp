@@ -14,7 +14,8 @@ import {
 } from "react-native";
 
 import { isLocalUser } from "../constants/session";
-import { APP_VERSION, THEME_MODES } from "../theme/appTheme";3
+import { APP_VERSION, THEME_MODES } from "../theme/appTheme";
+3;
 
 import AdCard from "./AdCard";
 
