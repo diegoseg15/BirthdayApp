@@ -16,6 +16,42 @@ import { Ionicons } from "@expo/vector-icons";
 import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
 
+import AdCard from "./AdCard";
+
+const AD_INTERVAL = 4;
+
+function buildListDataWithAds(birthdays) {
+  if (birthdays.length < AD_INTERVAL) {
+    return birthdays.map((birthday) => ({
+      type: "birthday",
+      id: birthday.id,
+      birthday,
+    }));
+  }
+
+  const listData = [];
+
+  birthdays.forEach((birthday, index) => {
+    listData.push({
+      type: "birthday",
+      id: birthday.id,
+      birthday,
+    });
+
+    const shouldInsertAd =
+      (index + 1) % AD_INTERVAL === 0 && index !== birthdays.length - 1;
+
+    if (shouldInsertAd) {
+      listData.push({
+        type: "ad",
+        id: `ad-${index + 1}`,
+      });
+    }
+  });
+
+  return listData;
+}
+
 export default function ListBirthday({
   userId,
   theme,
@@ -107,7 +143,7 @@ export default function ListBirthday({
 
   return (
     <FlatList
-      data={birthdays}
+      data={listData}
       keyExtractor={(item) => item.id}
       contentContainerStyle={[
         styles.listContent,
@@ -121,16 +157,22 @@ export default function ListBirthday({
         />
       }
       ListEmptyComponent={<EmptyState styles={styles} theme={theme} />}
-      renderItem={({ item }) => (
-        <BirthdayCard
-          birthday={item}
-          styles={styles}
-          theme={theme}
-          notificationsEnabled={notificationsEnabled}
-          onEdit={() => onEditBirthday(item)}
-          onDelete={() => confirmDelete(item)}
-        />
-      )}
+      renderItem={({ item }) => {
+        if (item.type === "ad") {
+          return <AdCard theme={theme} placement="birthday-list" />;
+        }
+
+        return (
+          <BirthdayCard
+            birthday={item.birthday}
+            styles={styles}
+            theme={theme}
+            notificationsEnabled={notificationsEnabled}
+            onEdit={() => onEditBirthday(item.birthday)}
+            onDelete={() => confirmDelete(item.birthday)}
+          />
+        );
+      }}
     />
   );
 }
