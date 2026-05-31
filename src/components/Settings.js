@@ -14,7 +14,9 @@ import {
 } from "react-native";
 
 import { isLocalUser } from "../constants/session";
-import { APP_VERSION, THEME_MODES } from "../theme/appTheme";
+import { APP_VERSION, THEME_MODES } from "../theme/appTheme";3
+
+import AdCard from "./AdCard";
 
 const PORTFOLIO_URL = "https://portfolio-77060.web.app/";
 
@@ -137,6 +139,8 @@ function Settings({
           </View>
         )}
       </View>
+
+      <AdCard theme={theme} placement="settings" />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Notificaciones</Text>
