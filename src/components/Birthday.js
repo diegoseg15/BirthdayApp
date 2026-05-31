@@ -5,6 +5,7 @@ import { Alert, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { logout } from "../services/authService";
+import { isLocalUser } from "../constants/session";
 import {
   disableBirthdayRemindersForUser,
   enableBirthdayRemindersForUser,
@@ -40,6 +41,12 @@ export default function Birthday({
   const [migrationError, setMigrationError] = useState("");
 
   useEffect(() => {
+    if (isLocalUser(user)) {
+      setMigrationMessage("");
+      setMigrationError("");
+      return undefined;
+    }
+
     let isMounted = true;
 
     async function runLegacyMigration() {
@@ -75,7 +82,7 @@ export default function Birthday({
     return () => {
       isMounted = false;
     };
-  }, [user.uid]);
+  }, [user]);
 
   const openAddBirthday = () => {
     setBirthdayToEdit(null);
