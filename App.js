@@ -35,10 +35,10 @@ function AppContent() {
     updateNotificationsEnabled,
   } = useAppSettings();
 
-useEffect(() => {
-  configureNotifications();
-  initializeAds();
-}, []);
+  useEffect(() => {
+    configureNotifications();
+    initializeAds();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = listenAuthState((currentUser) => {
