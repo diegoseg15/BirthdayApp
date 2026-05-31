@@ -11,6 +11,7 @@ import Birthday from "./src/components/Birthday";
 import { listenAuthState } from "./src/services/authService";
 import { configureNotifications } from "./src/services/notificationService";
 import { useAppSettings } from "./src/hooks/useAppSettings";
+import { LOCAL_USER } from "./src/constants/session";
 
 export default function App() {
   return (
@@ -22,6 +23,8 @@ export default function App() {
 
 function AppContent() {
   const [user, setUser] = useState(undefined);
+  const [user, setUser] = useState(null);
+  const activeUser = user || LOCAL_USER;
 
   const {
     settings,
@@ -71,12 +74,12 @@ function AppContent() {
 
       {user ? (
         <Birthday
-          user={user}
+          user={activeUser}
           theme={theme}
-          appSettings={settings}
+          appSettings={appSettings}
           deviceLanguage={deviceLanguage}
-          onChangeThemeMode={updateThemeMode}
-          onChangeNotificationsEnabled={updateNotificationsEnabled}
+          onChangeThemeMode={handleChangeThemeMode}
+          onChangeNotificationsEnabled={handleChangeNotificationsEnabled}
         />
       ) : (
         <Auth theme={theme} />
