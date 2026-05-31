@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +16,7 @@ import BrandLogo from "./BrandLogo";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 
-export default function Auth({ theme }) {
+export default function Auth({ theme, onContinueLocal }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [isLogin, setIsLogin] = useState(true);
 
@@ -59,6 +60,14 @@ export default function Auth({ theme }) {
               <RegisterForm changeForm={changeForm} />
             )}
           </View>
+
+          <TouchableOpacity
+            style={styles.localButton}
+            onPress={onContinueLocal}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.localButtonText}>Continuar sin cuenta</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -106,6 +115,19 @@ function createStyles(theme) {
       backgroundColor: theme.colors.card,
       borderWidth: 1,
       borderColor: theme.colors.border,
+    },
+    localButton: {
+      height: 50,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 16,
+      backgroundColor: theme.colors.surfaceAlt,
+    },
+    localButtonText: {
+      color: theme.colors.text,
+      fontSize: 15,
+      fontWeight: "900",
     },
   });
 }
