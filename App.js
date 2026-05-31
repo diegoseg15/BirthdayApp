@@ -8,10 +8,10 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import Auth from "./src/components/Auth";
 import Birthday from "./src/components/Birthday";
+import { LOCAL_USER } from "./src/constants/session";
+import { useAppSettings } from "./src/hooks/useAppSettings";
 import { listenAuthState } from "./src/services/authService";
 import { configureNotifications } from "./src/services/notificationService";
-import { useAppSettings } from "./src/hooks/useAppSettings";
-import { LOCAL_USER } from "./src/constants/session";
 
 export default function App() {
   return (
@@ -23,8 +23,7 @@ export default function App() {
 
 function AppContent() {
   const [user, setUser] = useState(undefined);
-  const [user, setUser] = useState(null);
-  const activeUser = user || LOCAL_USER;
+  const [isAuthVisible, setIsAuthVisible] = useState(false);
 
   const {
     settings,
@@ -42,6 +41,10 @@ function AppContent() {
   useEffect(() => {
     const unsubscribe = listenAuthState((currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        setIsAuthVisible(false);
+      }
     });
 
     return unsubscribe;
@@ -65,6 +68,8 @@ function AppContent() {
     );
   }
 
+  const activeUser = user || LOCAL_USER;
+
   return (
     <>
       <StatusBar
@@ -72,17 +77,18 @@ function AppContent() {
         backgroundColor={theme.colors.background}
       />
 
-      {user ? (
+      {isAuthVisible && !user ? (
+        <Auth theme={theme} onContinueLocal={() => setIsAuthVisible(false)} />
+      ) : (
         <Birthday
           user={activeUser}
           theme={theme}
-          appSettings={appSettings}
+          appSettings={settings}
           deviceLanguage={deviceLanguage}
-          onChangeThemeMode={handleChangeThemeMode}
-          onChangeNotificationsEnabled={handleChangeNotificationsEnabled}
+          onChangeThemeMode={updateThemeMode}
+          onChangeNotificationsEnabled={updateNotificationsEnabled}
+          onRequestLogin={() => setIsAuthVisible(true)}
         />
-      ) : (
-        <Auth theme={theme} />
       )}
     </>
   );
