@@ -9,9 +9,7 @@
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#F8FAFC",
     "primaryColor": "#F97316",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "plugins": [
       [
         "expo-notifications",
@@ -22,7 +20,14 @@
       ],
       "expo-localization",
       "expo-system-ui",
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true,
