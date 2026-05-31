@@ -12,6 +12,7 @@ import { LOCAL_USER } from "./src/constants/session";
 import { useAppSettings } from "./src/hooks/useAppSettings";
 import { listenAuthState } from "./src/services/authService";
 import { configureNotifications } from "./src/services/notificationService";
+import { initializeAds } from "./src/services/adService";
 
 export default function App() {
   return (
@@ -34,9 +35,10 @@ function AppContent() {
     updateNotificationsEnabled,
   } = useAppSettings();
 
-  useEffect(() => {
-    configureNotifications();
-  }, []);
+useEffect(() => {
+  configureNotifications();
+  initializeAds();
+}, []);
 
   useEffect(() => {
     const unsubscribe = listenAuthState((currentUser) => {
