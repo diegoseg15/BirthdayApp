@@ -28,6 +28,7 @@ export default function Birthday({
   deviceLanguage,
   onChangeThemeMode,
   onChangeNotificationsEnabled,
+  onRequestLogin,
 }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -151,6 +152,7 @@ export default function Birthday({
             onChangeThemeMode={onChangeThemeMode}
             onChangeNotificationsEnabled={handleChangeNotifications}
             onLogout={handleLogout}
+            onRequestLogin={onRequestLogin}
             isLoggingOut={isLoggingOut}
           />
         )}
