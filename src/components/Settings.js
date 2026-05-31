@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { isLocalUser } from "../constants/session";
 import { APP_VERSION, THEME_MODES } from "../theme/appTheme";
 
 const PORTFOLIO_URL = "https://portfolio-77060.web.app/";
@@ -43,10 +44,13 @@ function Settings({
   onChangeThemeMode,
   onChangeNotificationsEnabled,
   onLogout,
+  onRequestLogin,
   isLoggingOut,
 }) {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [isUpdatingNotifications, setIsUpdatingNotifications] = useState(false);
+
+  const isLocalMode = isLocalUser(user);
 
   const toggleNotifications = async (value) => {
     try {
@@ -87,8 +91,51 @@ function Settings({
         <Text style={styles.eyebrow}>Configuración</Text>
         <Text style={styles.title}>Personaliza tu experiencia</Text>
         <Text style={styles.description}>
-          Ajusta recordatorios, apariencia, idioma y datos generales de la app.
+          Ajusta recordatorios, apariencia, idioma y datos generales de Rimind.
         </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Cuenta</Text>
+
+        {isLocalMode ? (
+          <View style={styles.syncCard}>
+            <Text style={styles.settingTitle}>Modo local</Text>
+            <Text style={styles.settingDescription}>
+              Tus datos están guardados solo en este dispositivo. Inicia sesión
+              para sincronizarlos y respaldarlos en la nube.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={onRequestLogin}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.loginButtonText}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.infoCard}>
+            <Text style={styles.settingTitle}>Sesión activa</Text>
+            <Text style={styles.settingDescription}>{user.email}</Text>
+
+            <TouchableOpacity
+              style={[
+                styles.logoutButton,
+                isLoggingOut && styles.disabledButton,
+              ]}
+              onPress={onLogout}
+              disabled={isLoggingOut}
+              activeOpacity={0.85}
+            >
+              {isLoggingOut ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>
@@ -96,9 +143,9 @@ function Settings({
 
         <View style={styles.settingRow}>
           <View style={styles.settingTextBlock}>
-            <Text style={styles.settingTitle}>Recordatorios de cumpleaños</Text>
+            <Text style={styles.settingTitle}>Recordatorios de fechas</Text>
             <Text style={styles.settingDescription}>
-              Programar alertas para los cumpleaños guardados.
+              Programar alertas para tus cumpleaños y fechas importantes.
             </Text>
           </View>
 
@@ -164,35 +211,13 @@ function Settings({
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Cuenta</Text>
-
-        <View style={styles.infoCard}>
-          <Text style={styles.settingTitle}>Sesión activa</Text>
-          <Text style={styles.settingDescription}>{user.email}</Text>
-
-          <TouchableOpacity
-            style={[styles.logoutButton, isLoggingOut && styles.disabledButton]}
-            onPress={onLogout}
-            disabled={isLoggingOut}
-            activeOpacity={0.85}
-          >
-            {isLoggingOut ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Información de la app</Text>
 
         <View style={styles.infoCard}>
-          <Text style={styles.appName}>BirthdayApp</Text>
+          <Text style={styles.appName}>Rimind</Text>
           <Text style={styles.settingDescription}>
-            Organizador de cumpleaños con recordatorios y sincronización en la
-            nube.
+            Calendario personal para recordar cumpleaños, fechas importantes y
+            momentos que no quieres olvidar.
           </Text>
 
           <View style={styles.infoGrid}>
@@ -335,6 +360,13 @@ function createStyles(theme) {
       borderWidth: 1,
       borderColor: theme.colors.border,
     },
+    syncCard: {
+      borderRadius: theme.radius.lg,
+      padding: theme.spacing.lg,
+      backgroundColor: theme.colors.primarySoft,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
     infoPill: {
       alignSelf: "flex-start",
       marginTop: theme.spacing.md,
@@ -370,6 +402,19 @@ function createStyles(theme) {
       color: theme.colors.text,
       fontSize: 15,
       fontWeight: "800",
+    },
+    loginButton: {
+      height: 50,
+      borderRadius: theme.radius.md,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.primary,
+      marginTop: theme.spacing.lg,
+    },
+    loginButtonText: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "900",
     },
     portfolioButton: {
       height: 50,
