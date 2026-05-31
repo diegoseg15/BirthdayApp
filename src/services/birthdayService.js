@@ -21,6 +21,16 @@ import {
   scheduleBirthdayReminder,
 } from "./notificationService";
 
+import { isLocalUserId } from "../constants/session";
+import {
+  createLocalBirthday,
+  disableLocalBirthdayReminders,
+  enableLocalBirthdayReminders,
+  listenLocalBirthdays,
+  removeLocalBirthday,
+  updateLocalBirthday,
+} from "./localBirthdayService";
+
 const FALLBACK_BIRTH_YEAR = 2000;
 
 export const REMINDER_STATUS = {
@@ -78,6 +88,10 @@ async function safeScheduleBirthdayReminder({
 }
 
 export function listenBirthdays(userId, callback, onError) {
+  if (isLocalUserId(userId)) {
+    return listenLocalBirthdays(callback, onError);
+  }
+
   const birthdaysQuery = query(
     getBirthdaysCollection(userId),
     orderBy("dateBirth", "asc"),
@@ -99,6 +113,13 @@ export function listenBirthdays(userId, callback, onError) {
 
 export async function migrateLegacyBirthdays(userId) {
   const legacySnapshot = await getDocs(getLegacyBirthdaysCollection(userId));
+
+  if (isLocalUserId(userId)) {
+    return {
+      migrated: 0,
+      skipped: 0,
+    };
+  }
 
   if (legacySnapshot.empty) {
     return {
@@ -187,6 +208,10 @@ export async function createBirthday(
     hasBirthYear,
   );
 
+  if (isLocalUserId(userId)) {
+    return createLocalBirthday(birthdayData, options);
+  }
+
   const birthdayRef = await addDoc(getBirthdaysCollection(userId), {
     name: cleanName,
     lastname: cleanLastname,
@@ -241,6 +266,10 @@ export async function updateBirthday(
     hasBirthYear,
   );
 
+  if (isLocalUserId(userId)) {
+    return updateLocalBirthday(birthdayId, birthdayData, options);
+  }
+
   if (options.currentNotificationId) {
     await cancelBirthdayReminder(options.currentNotificationId);
   }
@@ -280,6 +309,10 @@ export async function enableBirthdayRemindersForUser(userId) {
   const batch = writeBatch(db);
   let enabled = 0;
 
+  if (isLocalUserId(userId)) {
+    return enableLocalBirthdayReminders();
+  }
+
   for (const birthdayDocument of snapshot.docs) {
     const birthday = {
       id: birthdayDocument.id,
@@ -318,6 +351,10 @@ export async function disableBirthdayRemindersForUser(userId) {
   const batch = writeBatch(db);
   let disabled = 0;
 
+  if (isLocalUserId(userId)) {
+    return disableLocalBirthdayReminders();
+  }
+
   for (const birthdayDocument of snapshot.docs) {
     const birthday = birthdayDocument.data();
 
@@ -342,6 +379,10 @@ export async function disableBirthdayRemindersForUser(userId) {
 }
 
 export async function removeBirthday(userId, birthdayId, notificationId) {
+  if (isLocalUserId(userId)) {
+    return removeLocalBirthday(birthdayId, notificationId);
+  }
+
   await cancelBirthdayReminder(notificationId);
 
   const birthdayRef = doc(db, "users", userId, "birthdays", birthdayId);
