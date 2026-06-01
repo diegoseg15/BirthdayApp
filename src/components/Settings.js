@@ -15,9 +15,8 @@ import {
 
 import { isLocalUser } from "../constants/session";
 import { APP_VERSION, THEME_MODES } from "../theme/appTheme";
-3;
-
 import AdCard from "./AdCard";
+import SupportAdCard from "./SupportAdCard";
 
 const PORTFOLIO_URL = "https://portfolio-77060.web.app/";
 
@@ -94,7 +93,8 @@ function Settings({
         <Text style={styles.eyebrow}>Configuración</Text>
         <Text style={styles.title}>Personaliza tu experiencia</Text>
         <Text style={styles.description}>
-          Ajusta recordatorios, apariencia, idioma y datos generales de Rimind.
+          Ajusta tu cuenta, recordatorios, apariencia y datos generales de
+          Rimind.
         </Text>
       </View>
 
@@ -140,8 +140,6 @@ function Settings({
           </View>
         )}
       </View>
-
-      <AdCard theme={theme} placement="settings" />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Notificaciones</Text>
@@ -214,6 +212,10 @@ function Settings({
           </View>
         </View>
       </View>
+
+      <SupportAdCard theme={theme} />
+
+      <AdCard theme={theme} placement="settings" />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Información de la app</Text>
