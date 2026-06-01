@@ -17,7 +17,33 @@ import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
 import AdCard from "./AdCard";
 
-const AD_INTERVAL = 4;
+const AD_INTERVAL = 3;
+
+const SORT_MODES = {
+  UPCOMING: "upcoming",
+  NAME: "name",
+  MONTH: "month",
+  RECENT: "recent",
+};
+
+const SORT_OPTIONS = [
+  {
+    label: "Próximos",
+    value: SORT_MODES.UPCOMING,
+  },
+  {
+    label: "Nombre",
+    value: SORT_MODES.NAME,
+  },
+  {
+    label: "Mes",
+    value: SORT_MODES.MONTH,
+  },
+  {
+    label: "Recientes",
+    value: SORT_MODES.RECENT,
+  },
+];
 
 function buildListDataWithAds(birthdays) {
   if (birthdays.length < AD_INTERVAL) {
@@ -51,6 +77,80 @@ function buildListDataWithAds(birthdays) {
   return listData;
 }
 
+function sortBirthdays(birthdays, sortMode) {
+  const sortedBirthdays = [...birthdays];
+
+  if (sortMode === SORT_MODES.NAME) {
+    return sortedBirthdays.sort((a, b) => {
+      const nameA = `${a.name || ""} ${a.lastname || ""}`.trim().toLowerCase();
+      const nameB = `${b.name || ""} ${b.lastname || ""}`.trim().toLowerCase();
+
+      return nameA.localeCompare(nameB);
+    });
+  }
+
+  if (sortMode === SORT_MODES.MONTH) {
+    return sortedBirthdays.sort((a, b) => {
+      const monthA = Number(a.birthMonth || 0);
+      const monthB = Number(b.birthMonth || 0);
+      const dayA = Number(a.birthDay || 0);
+      const dayB = Number(b.birthDay || 0);
+
+      if (monthA !== monthB) return monthA - monthB;
+
+      return dayA - dayB;
+    });
+  }
+
+  if (sortMode === SORT_MODES.RECENT) {
+    return sortedBirthdays.sort((a, b) => {
+      const timeA = getTimestampValue(a.updatedAt || a.createdAt);
+      const timeB = getTimestampValue(b.updatedAt || b.createdAt);
+
+      return timeB - timeA;
+    });
+  }
+
+  return sortedBirthdays.sort((a, b) => {
+    const nextA = getNextBirthdayInfo(a.dateBirth, a);
+    const nextB = getNextBirthdayInfo(b.dateBirth, b);
+
+    const daysA = Number.isFinite(nextA.daysLeft) ? nextA.daysLeft : 9999;
+    const daysB = Number.isFinite(nextB.daysLeft) ? nextB.daysLeft : 9999;
+
+    if (daysA !== daysB) return daysA - daysB;
+
+    const monthA = Number(a.birthMonth || 0);
+    const monthB = Number(b.birthMonth || 0);
+    const dayA = Number(a.birthDay || 0);
+    const dayB = Number(b.birthDay || 0);
+
+    if (monthA !== monthB) return monthA - monthB;
+
+    return dayA - dayB;
+  });
+}
+
+function getTimestampValue(value) {
+  if (!value) return 0;
+
+  if (value?.toDate) {
+    return value.toDate().getTime();
+  }
+
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+
+  if (typeof value === "string") {
+    const parsedDate = new Date(value);
+
+    return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+  }
+
+  return 0;
+}
+
 export default function ListBirthday({
   userId,
   theme,
@@ -60,11 +160,20 @@ export default function ListBirthday({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [birthdays, setBirthdays] = useState([]);
+  const [sortMode, setSortMode] = useState(SORT_MODES.UPCOMING);
   const [isLoading, setIsLoading] = useState(true);
   const [listError, setListError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
-  const listData = useMemo(() => buildListDataWithAds(birthdays), [birthdays]);
+  const sortedBirthdays = useMemo(
+    () => sortBirthdays(birthdays, sortMode),
+    [birthdays, sortMode],
+  );
+
+  const listData = useMemo(
+    () => buildListDataWithAds(sortedBirthdays),
+    [sortedBirthdays],
+  );
 
   useEffect(() => {
     setIsLoading(true);
@@ -157,6 +266,15 @@ export default function ListBirthday({
           tintColor={theme.colors.primary}
         />
       }
+      ListHeaderComponent={
+        birthdays.length > 1 ? (
+          <SortBar
+            styles={styles}
+            sortMode={sortMode}
+            onChangeSortMode={setSortMode}
+          />
+        ) : null
+      }
       ListEmptyComponent={<EmptyState styles={styles} theme={theme} />}
       renderItem={({ item }) => {
         if (item.type === "ad") {
@@ -175,6 +293,38 @@ export default function ListBirthday({
         );
       }}
     />
+  );
+}
+
+function SortBar({ styles, sortMode, onChangeSortMode }) {
+  return (
+    <View style={styles.sortCard}>
+      <Text style={styles.sortTitle}>Ordenar por</Text>
+
+      <View style={styles.sortOptions}>
+        {SORT_OPTIONS.map((option) => {
+          const isActive = sortMode === option.value;
+
+          return (
+            <TouchableOpacity
+              key={option.value}
+              style={[styles.sortChip, isActive && styles.sortChipActive]}
+              onPress={() => onChangeSortMode(option.value)}
+              activeOpacity={0.85}
+            >
+              <Text
+                style={[
+                  styles.sortChipText,
+                  isActive && styles.sortChipTextActive,
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -317,6 +467,45 @@ function createStyles(theme) {
       fontSize: 22,
       fontWeight: "900",
       marginBottom: 6,
+    },
+    sortCard: {
+      borderRadius: 22,
+      padding: 16,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 14,
+    },
+    sortTitle: {
+      color: theme.colors.text,
+      fontSize: 15,
+      fontWeight: "900",
+      marginBottom: 12,
+    },
+    sortOptions: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    sortChip: {
+      borderRadius: 999,
+      paddingVertical: 9,
+      paddingHorizontal: 13,
+      backgroundColor: theme.colors.input,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    sortChipActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+    sortChipText: {
+      color: theme.colors.textMuted,
+      fontSize: 13,
+      fontWeight: "900",
+    },
+    sortChipTextActive: {
+      color: "#FFFFFF",
     },
     card: {
       borderRadius: 24,
