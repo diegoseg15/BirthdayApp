@@ -14,7 +14,8 @@ import {
 } from "react-native";
 
 import { isLocalUser } from "../constants/session";
-import { APP_VERSION, THEME_MODES } from "../theme/appTheme";
+import { THEME_MODES } from "../theme/appTheme";
+import { getAppVersion } from "../utils/appInfo";
 import AdCard from "./AdCard";
 import SupportAdCard from "./SupportAdCard";
 
@@ -53,6 +54,8 @@ function Settings({
   const [isUpdatingNotifications, setIsUpdatingNotifications] = useState(false);
 
   const isLocalMode = isLocalUser(user);
+
+  const appVersion = getAppVersion();
 
   const toggleNotifications = async (value) => {
     try {
@@ -230,7 +233,7 @@ function Settings({
           <View style={styles.infoGrid}>
             <View style={styles.infoItem}>
               <Text style={styles.infoItemLabel}>Versión</Text>
-              <Text style={styles.infoItemValue}>{APP_VERSION}</Text>
+              <Text style={styles.infoItemValue}>{appVersion}</Text>
             </View>
 
             <View style={styles.infoItem}>
