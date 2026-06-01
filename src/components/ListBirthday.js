@@ -15,7 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { listenBirthdays, removeBirthday } from "../services/birthdayService";
 import { formatDate, getNextBirthdayInfo } from "../utils/date";
-
 import AdCard from "./AdCard";
 
 const AD_INTERVAL = 4;
@@ -64,6 +63,8 @@ export default function ListBirthday({
   const [isLoading, setIsLoading] = useState(true);
   const [listError, setListError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+
+  const listData = useMemo(() => buildListDataWithAds(birthdays), [birthdays]);
 
   useEffect(() => {
     setIsLoading(true);
