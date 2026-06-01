@@ -36,7 +36,7 @@ export default function AdCard({ theme, placement = "default" }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerTextBlock}>
           <Text style={styles.label}>Publicidad</Text>
           <Text style={styles.title}>Contenido patrocinado</Text>
         </View>
@@ -46,18 +46,20 @@ export default function AdCard({ theme, placement = "default" }) {
         </View>
       </View>
 
-      <View style={styles.bannerContainer}>
-        <BannerAd
-          unitId={bannerAdUnitId}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{
-            requestNonPersonalizedAdsOnly: true,
-          }}
-          onAdFailedToLoad={(error) => {
-            console.warn("Ad failed to load:", error);
-            setHasAdError(true);
-          }}
-        />
+      <View style={styles.bannerOuter}>
+        <View style={styles.bannerInner}>
+          <BannerAd
+            unitId={bannerAdUnitId}
+            size={BannerAdSize.LARGE_BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: true,
+            }}
+            onAdFailedToLoad={(error) => {
+              console.warn("Ad failed to load:", error);
+              setHasAdError(true);
+            }}
+          />
+        </View>
       </View>
     </View>
   );
@@ -74,7 +76,6 @@ function createStyles(theme, placement) {
       borderWidth: 1,
       borderColor: theme.colors.border,
       marginBottom: isSettingsPlacement ? theme.spacing.xl : 14,
-      overflow: "hidden",
     },
     header: {
       flexDirection: "row",
@@ -82,6 +83,9 @@ function createStyles(theme, placement) {
       justifyContent: "space-between",
       gap: theme.spacing.md,
       marginBottom: theme.spacing.md,
+    },
+    headerTextBlock: {
+      flex: 1,
     },
     label: {
       color: theme.colors.primary,
@@ -107,14 +111,22 @@ function createStyles(theme, placement) {
       fontSize: 12,
       fontWeight: "900",
     },
-    bannerContainer: {
-      minHeight: 70,
+    bannerOuter: {
+      minHeight: 120,
       borderRadius: theme.radius.md,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: theme.colors.input,
       borderWidth: 1,
       borderColor: theme.colors.border,
+      overflow: "hidden",
+    },
+    bannerInner: {
+      width: 320,
+      height: 100,
+      maxWidth: "100%",
+      alignItems: "center",
+      justifyContent: "center",
       overflow: "hidden",
     },
   });
