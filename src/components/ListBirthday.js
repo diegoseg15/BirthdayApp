@@ -6,6 +6,7 @@ import {
   Alert,
   FlatList,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -301,7 +302,11 @@ function SortBar({ styles, sortMode, onChangeSortMode }) {
     <View style={styles.sortCard}>
       <Text style={styles.sortTitle}>Ordenar por</Text>
 
-      <View style={styles.sortOptions}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.sortScrollContent}
+      >
         {SORT_OPTIONS.map((option) => {
           const isActive = sortMode === option.value;
 
@@ -323,7 +328,7 @@ function SortBar({ styles, sortMode, onChangeSortMode }) {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -470,10 +475,8 @@ function createStyles(theme) {
     },
     sortCard: {
       borderRadius: 22,
-      padding: 16,
-      backgroundColor: theme.colors.card,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
+      paddingBottom: 16,
+      paddingHorizontal: 16,
       marginBottom: 14,
     },
     sortTitle: {
@@ -482,15 +485,17 @@ function createStyles(theme) {
       fontWeight: "900",
       marginBottom: 12,
     },
-    sortOptions: {
-      flexDirection: "row",
-      flexWrap: "wrap",
+    sortScrollContent: {
       gap: 8,
+      paddingRight: 4,
     },
     sortChip: {
+      minWidth: 92,
       borderRadius: 999,
       paddingVertical: 9,
       paddingHorizontal: 13,
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: theme.colors.input,
       borderWidth: 1,
       borderColor: theme.colors.border,
